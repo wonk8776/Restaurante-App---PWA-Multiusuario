@@ -244,9 +244,17 @@
                     }
                     opciones += '<button type="button" class="btn-sm btn-primary" data-id="' + id + '" data-estado="pagada">Pagada</button>';
                 }
-                rows.push(
-                    '<tr><td data-label="Mesa">' + escapeHtml(mesa) + '</td><td data-label="Mesero">' + escapeHtml(mesero) + '</td><td data-label="Platillos">' + escapeHtml(platillos) + '</td><td data-label="Total">' + total + '</td><td data-label="Estado"><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td data-label="Acciones">' + opciones + '</td></tr>'
-                );
+                var cardHtml = '<div class="orden-card-mobile">' +
+                    '<div><strong>Mesa:</strong> ' + escapeHtml(mesa) + '</div>' +
+                    '<div><strong>Mesero:</strong> ' + escapeHtml(mesero) + '</div>' +
+                    '<div><strong>Platillos:</strong> ' + escapeHtml(platillos) + '</div>' +
+                    '<div><strong>Total:</strong> ' + total + '</div>' +
+                    '<div><strong>Estado:</strong> <span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></div>' +
+                    '<div class="orden-card-actions">' + opciones + '</div>' +
+                    '</div>';
+                var desktopRow = '<tr class="orden-desktop-row"><td>' + escapeHtml(mesa) + '</td><td>' + escapeHtml(mesero) + '</td><td>' + escapeHtml(platillos) + '</td><td>' + total + '</td><td><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td>' + opciones + '</td></tr>';
+                var mobileRow = '<tr class="orden-mobile-row"><td colspan="6">' + cardHtml + '</td></tr>';
+                rows.push(desktopRow + mobileRow);
             });
         }
         ordenesBody.innerHTML = rows.join('');
