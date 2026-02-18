@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante Pro - Panel Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg: #121212;
+            --color-card: #1E1E1E;
+            --color-primary: #D4AF37;
+            --color-text: #E0E0E0;
+            --color-text-muted: #A0A0A0;
+            --color-error: #CF6679;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Lato', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--color-card);
+            border-right: 1px solid #333;
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar .logo {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            color: var(--color-primary);
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-list li {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-list a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: var(--color-text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .nav-list a:hover {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--color-primary);
+        }
+
+        .nav-list a.active {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--color-primary);
+            font-weight: 700;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        /* Main area */
+        .main-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .header {
+            background-color: var(--color-card);
+            border-bottom: 1px solid #333;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h2 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            color: var(--color-text);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-name {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--color-primary);
+            color: var(--color-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: var(--color-primary);
+            color: #121212;
+        }
+
+        .content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Cards dashboard */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--color-card);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-value {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: var(--color-primary);
+        }
+
+        /* Tables */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: var(--color-card);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        th {
+            font-weight: 700;
+            color: var(--color-primary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            margin-right: 4px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-sm:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: #121212;
+            font-weight: 700;
+        }
+
+        .btn-secondary {
+            background: #2C2C2C;
+            color: var(--color-text);
+            border: 1px solid #444;
+        }
+
+        .btn-danger {
+            background: var(--color-error);
+            color: #fff;
+        }
+
+        .estado-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .estado-pendiente { background: rgba(255,193,7,0.2); color: #FFC107; }
+        .estado-preparando { background: rgba(33,150,243,0.2); color: #2196F3; }
+        .estado-servido { background: rgba(76,175,80,0.2); color: #4CAF50; }
+        .estado-pagada { background: rgba(76,175,80,0.3); color: #81C784; }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 12px;
+            background: #2C2C2C;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: var(--color-text);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .section-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-toolbar h3 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            color: var(--color-primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: var(--color-primary);
+            color: #121212;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            background: #C5A028;
+        }
+
+        /* Reportes */
+        .report-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-filters input,
+        .report-filters select {
+            padding: 10px 12px;
+            background: #2C2C2C;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: var(--color-text);
+        }
+
+        .msg-empty {
+            color: var(--color-text-muted);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #333;
+                padding: 1rem;
+            }
+
+            .sidebar .logo {
+                margin-bottom: 1rem;
+            }
+
+            .nav-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+            }
+
+            .nav-list li {
+                margin: 0;
+            }
+
+            .nav-list a {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .header {
+                flex-wrap: wrap;
+            }
+
+            .admin-name {
+                width: 100%;
+                order: 3;
+                margin-top: 0.5rem;
+            }
+
+            .dashboard-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="logo">LUXE DINING</div>
+            <ul class="nav-list">
+                <li><a href="#" data-section="dashboard" class="active">Dashboard</a></li>
+                <li><a href="#" data-section="ordenes">Órdenes en vivo</a></li>
+                <li><a href="#" data-section="menu">Menú</a></li>
+                <li><a href="#" data-section="meseros">Meseros</a></li>
+                <li><a href="#" data-section="gastos">Gastos</a></li>
+                <li><a href="#" data-section="reportes">Reportes</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-wrap">
+            <header class="header">
+                <h2 id="headerTitle">Dashboard</h2>
+                <div class="header-actions">
+                    <span class="admin-name" id="adminName">Admin</span>
+                    <button type="button" class="btn-logout" id="btnLogout">Cerrar sesión</button>
+                </div>
+            </header>
+
+            <main class="content">
+                <!-- Dashboard -->
+                <section id="section-dashboard" class="section active">
+                    <div class="dashboard-cards">
+                        <div class="card">
+                            <div class="card-title">Ventas del día</div>
+                            <div class="card-value" id="ventasDia">$0</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Gastos del día</div>
+                            <div class="card-value" id="gastosDia">$0</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Ganancia neta</div>
+                            <div class="card-value" id="gananciaNeta">$0</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Órdenes activas</div>
+                            <div class="card-value" id="ordenesActivas">0</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Órdenes en vivo -->
+                <section id="section-ordenes" class="section">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mesa</th>
+                                    <th>Mesero</th>
+                                    <th>Platillos</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordenesBody">
+                                <tr><td colspan="6" class="msg-empty">Cargando órdenes…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Menú -->
+                <section id="section-menu" class="section">
+                    <div class="section-toolbar">
+                        <h3>Platillos</h3>
+                        <button type="button" class="btn" id="btnAgregarPlatillo">Agregar platillo</button>
+                    </div>
+                    <div id="modalPlatillo" style="display:none;">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="platilloNombre" placeholder="Nombre del platillo">
+                        </div>
+                        <div class="form-group">
+                            <label>Precio ($)</label>
+                            <input type="number" id="platilloPrecio" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <button type="button" class="btn" id="btnGuardarPlatillo">Guardar</button>
+                        <button type="button" class="btn btn-secondary" id="btnCancelarPlatillo">Cancelar</button>
+                    </div>
+                    <div class="table-wrap" style="margin-top:1rem;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Precio</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="menuBody">
+                                <tr><td colspan="3" class="msg-empty">Cargando menú…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Meseros -->
+                <section id="section-meseros" class="section">
+                    <div class="section-toolbar">
+                        <h3>Meseros</h3>
+                        <button type="button" class="btn" id="btnCrearMesero">Crear mesero</button>
+                    </div>
+                    <div id="modalMesero" style="display:none;">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="meseroNombre" placeholder="Nombre completo">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo</label>
+                            <input type="email" id="meseroEmail" placeholder="correo@ejemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="meseroPassword" placeholder="••••••••">
+                        </div>
+                        <button type="button" class="btn" id="btnGuardarMesero">Guardar</button>
+                        <button type="button" class="btn btn-secondary" id="btnCancelarMesero">Cancelar</button>
+                        <p id="meseroError" class="error-msg" style="color:var(--color-error);margin-top:0.5rem;display:none;"></p>
+                    </div>
+                    <div class="table-wrap" style="margin-top:1rem;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Correo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="meserosBody">
+                                <tr><td colspan="2" class="msg-empty">Cargando meseros…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Gastos -->
+                <section id="section-gastos" class="section">
+                    <h3 style="font-family:var(--font-heading);color:var(--color-primary);margin-bottom:1rem;">Registrar gasto</h3>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" id="gastoDescripcion" placeholder="Ej: Compra de insumos">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="gastoCategoria">
+                            <option value="insumos">Insumos</option>
+                            <option value="personal">Personal</option>
+                            <option value="servicios">Servicios</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Monto ($)</label>
+                        <input type="number" id="gastoMonto" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Método de pago</label>
+                        <select id="gastoMetodoPago">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="tarjeta">Tarjeta</option>
+                            <option value="transferencia">Transferencia</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn" id="btnRegistrarGasto">Registrar gasto</button>
+                    <p id="gastoOk" style="color:#4CAF50;margin-top:0.5rem;display:none;">Gasto registrado.</p>
+                </section>
+
+                <!-- Reportes -->
+                <section id="section-reportes" class="section">
+                    <h3 style="font-family:var(--font-heading);color:var(--color-primary);margin-bottom:1rem;">Resumen por período</h3>
+                    <div class="report-filters">
+                        <input type="date" id="reporteDesde">
+                        <input type="date" id="reporteHasta">
+                        <button type="button" class="btn" id="btnFiltrarReporte">Filtrar</button>
+                        <button type="button" class="btn btn-secondary" id="btnExportarPdf">Exportar PDF</button>
+                    </div>
+                    <div class="card" style="margin-bottom:1rem;">
+                        <div class="card-title">Total ventas (período)</div>
+                        <div class="card-value" id="reporteTotalVentas">$0</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Mesa</th>
+                                    <th>Mesero</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportesBody">
+                                <tr><td colspan="4" class="msg-empty">Seleccione fechas y pulse Filtrar.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

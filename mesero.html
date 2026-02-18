@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante Pro - Panel Mesero</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg: #121212;
+            --color-card: #1E1E1E;
+            --color-primary: #D4AF37;
+            --color-text: #E0E0E0;
+            --color-text-muted: #A0A0A0;
+            --color-success: #4CAF50;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Lato', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
+
+        /* Header */
+        header {
+            background: var(--color-card);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .waiter-name {
+            font-size: 0.95rem;
+            color: var(--color-text-muted);
+        }
+
+        .waiter-name strong {
+            color: var(--color-primary);
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: transparent;
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: var(--color-primary);
+            color: var(--color-bg);
+        }
+
+        /* Main */
+        main {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Grid de mesas */
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 480px) {
+            .tables-grid {
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        .table-btn {
+            padding: 1rem 0.5rem;
+            background: var(--color-card);
+            color: var(--color-text);
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .table-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            transform: translateY(-2px);
+        }
+
+        .table-btn.selected {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--color-card);
+            border-radius: 12px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            color: var(--color-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0.25rem;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--color-primary);
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Menú */
+        .menu-section h3 {
+            font-size: 0.85rem;
+            color: var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #2C2C2C;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item-info {
+            flex: 1;
+        }
+
+        .menu-item-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .menu-item-price {
+            font-size: 0.85rem;
+            color: var(--color-primary);
+        }
+
+        .btn-add {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: var(--color-bg);
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .btn-add:hover {
+            background: #C5A028;
+            transform: scale(1.1);
+        }
+
+        /* Resumen pedido */
+        .order-summary {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+        }
+
+        .order-summary h3 {
+            font-size: 0.85rem;
+            color: var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+
+        .order-items {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 0.75rem;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0;
+            font-size: 0.9rem;
+        }
+
+        .order-item-qty {
+            color: var(--color-primary);
+            font-weight: 700;
+            min-width: 2rem;
+        }
+
+        .order-total {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            justify-content: space-between;
+            padding-top: 0.5rem;
+        }
+
+        .empty-order {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            font-style: italic;
+            padding: 0.5rem 0;
+        }
+
+        .btn-send {
+            width: 100%;
+            padding: 14px;
+            background: var(--color-primary);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        .btn-send:hover {
+            background: #C5A028;
+        }
+
+        .btn-send:active {
+            transform: scale(0.98);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Toast confirmación */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--color-success);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            z-index: 300;
+            opacity: 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Mis órdenes */
+        .my-orders-section {
+            margin-top: 2.5rem;
+        }
+
+        .my-orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .order-card {
+            background: var(--color-card);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .order-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .order-card-mesa {
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .order-card-estado {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .estado-pendiente { background: rgba(255, 152, 0, 0.3); color: #FF9800; }
+        .estado-preparacion { background: rgba(33, 150, 243, 0.3); color: #2196F3; }
+        .estado-listo { background: rgba(76, 175, 80, 0.3); color: #4CAF50; }
+        .estado-entregado { background: rgba(158, 158, 158, 0.3); color: #9E9E9E; }
+
+        .order-card-platillos {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .order-card-total {
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .my-orders-empty {
+            color: var(--color-text-muted);
+            font-style: italic;
+            padding: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <span class="logo">LUXE DINING</span>
+        <div class="header-right">
+            <span class="waiter-name">Mesero: <strong id="waiterName">---</strong></span>
+            <button type="button" class="btn-logout" id="btnLogout">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <main>
+        <h2>Seleccione una mesa</h2>
+        <div class="tables-grid" id="tablesGrid"></div>
+
+        <section class="my-orders-section">
+            <h2>Mis órdenes de hoy</h2>
+            <div class="my-orders-list" id="myOrdersList">
+                <p class="my-orders-empty">Cargando...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal pedido -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Mesa 1</h3>
+                <button type="button" class="modal-close" id="modalClose" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="menu-section">
+                    <h3>Menú</h3>
+                    <div class="menu-list" id="menuList"></div>
+                </div>
+                <div class="order-summary">
+                    <h3>Resumen del pedido</h3>
+                    <div class="order-items" id="orderItems">
+                        <p class="empty-order">Sin artículos</p>
+                    </div>
+                    <div class="order-total">
+                        <span>Total:</span>
+                        <span id="orderTotal">$0</span>
+                    </div>
+                    <button type="button" class="btn-send" id="btnSend" disabled>Enviar Orden</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast confirmación -->
+    <div class="toast" id="toast">Orden enviada correctamente</div>
+
+    <!-- Firebase SDKs (Compat v9) -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var selectedTable = null;
+            var order = {};
+            var tableButtons = {};
+            var menuItems = [];
+            var meseroNombre = '';
+
+            // DOM
+            var tablesGrid = document.getElementById('tablesGrid');
+            var modalOverlay = document.getElementById('modalOverlay');
+            var modalTitle = document.getElementById('modalTitle');
+            var modalClose = document.getElementById('modalClose');
+            var menuList = document.getElementById('menuList');
+            var orderItems = document.getElementById('orderItems');
+            var orderTotal = document.getElementById('orderTotal');
+            var btnSend = document.getElementById('btnSend');
+            var toast = document.getElementById('toast');
+            var waiterNameEl = document.getElementById('waiterName');
+            var btnLogout = document.getElementById('btnLogout');
+            var myOrdersList = document.getElementById('myOrdersList');
+
+            // Proteger página: si no hay usuario, ir a login
+            auth.onAuthStateChanged(function (user) {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                // 1. Obtener nombre del mesero desde usuarios/{uid}
+                db.collection('usuarios').doc(user.uid).get().then(function (doc) {
+                    if (doc.exists) {
+                        var data = doc.data();
+                        meseroNombre = data.nombre || data.displayName || user.displayName || user.email || 'Mesero';
+                    } else {
+                        meseroNombre = user.displayName || user.email || 'Mesero';
+                    }
+                    waiterNameEl.textContent = meseroNombre;
+                }).catch(function () {
+                    meseroNombre = user.displayName || user.email || 'Mesero';
+                    waiterNameEl.textContent = meseroNombre;
+                });
+
+                // 2. Menú dinámico en tiempo real desde db.collection('menu')
+                db.collection('menu').onSnapshot(function (snapshot) {
+                    menuItems = [];
+                    snapshot.forEach(function (doc) {
+                        var d = doc.data();
+                        menuItems.push({
+                            id: doc.id,
+                            name: d.nombre || d.name || 'Sin nombre',
+                            price: typeof d.precio !== 'undefined' ? Number(d.precio) : (d.price ? Number(d.price) : 0)
+                        });
+                    });
+                    if (modalOverlay.classList.contains('open')) {
+                        renderMenu();
+                    }
+                });
+
+                // 4. Órdenes del mesero en tiempo real
+                db.collection('ordenes').where('meseroId', '==', user.uid).onSnapshot(function (snapshot) {
+                    myOrdersList.innerHTML = '';
+                    if (snapshot.empty) {
+                        myOrdersList.innerHTML = '<p class="my-orders-empty">Aún no tienes órdenes hoy.</p>';
+                        return;
+                    }
+                    snapshot.forEach(function (doc) {
+                        var o = doc.data();
+                        var platillosText = (o.platillos || []).map(function (p) {
+                            return (p.cantidad || 0) + 'x ' + (p.nombre || '');
+                        }).join(', ') || '—';
+                        var estado = (o.estado || 'pendiente').toLowerCase().replace(/\s/g, '-');
+                        var estadoClass = 'estado-pendiente';
+                        if (estado === 'en-preparacion' || estado === 'preparacion') estadoClass = 'estado-preparacion';
+                        else if (estado === 'listo') estadoClass = 'estado-listo';
+                        else if (estado === 'entregado') estadoClass = 'estado-entregado';
+                        var card = document.createElement('div');
+                        card.className = 'order-card';
+                        card.innerHTML = '<div class="order-card-header">' +
+                            '<span class="order-card-mesa">Mesa ' + (o.mesa || '—') + '</span>' +
+                            '<span class="order-card-estado ' + estadoClass + '">' + (o.estado || 'pendiente') + '</span></div>' +
+                            '<div class="order-card-platillos">' + platillosText + '</div>' +
+                            '<div class="order-card-total">Total: $' + (o.total != null ? o.total : 0) + '</div>';
+                        myOrdersList.appendChild(card);
+                    });
+                });
+            });
+
+            // 5. Cerrar sesión
+            btnLogout.addEventListener('click', function () {
+                auth.signOut().then(function () {
+                    window.location.href = 'login.html';
+                });
+            });
+
+            // Crear grid de 50 mesas
+            for (var i = 1; i <= 50; i++) {
+                var btn = document.createElement('button');
+                btn.className = 'table-btn';
+                btn.textContent = 'Mesa ' + i;
+                btn.setAttribute('data-table', i);
+                btn.addEventListener('click', function () {
+                    openModal(parseInt(this.getAttribute('data-table'), 10));
+                });
+                tablesGrid.appendChild(btn);
+                tableButtons[i] = btn;
+            }
+
+            // Renderizar menú (desde menuItems cargados por onSnapshot)
+            function renderMenu() {
+                menuList.innerHTML = '';
+                menuItems.forEach(function (item) {
+                    var div = document.createElement('div');
+                    div.className = 'menu-item';
+                    div.innerHTML = '<div class="menu-item-info">' +
+                        '<span class="menu-item-name">' + item.name + '</span><br>' +
+                        '<span class="menu-item-price">$' + item.price + '</span></div>' +
+                        '<button type="button" class="btn-add" data-id="' + item.id + '" data-name="' + item.name + '" data-price="' + item.price + '">+</button>';
+                    menuList.appendChild(div);
+                });
+                menuList.querySelectorAll('.btn-add').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        addItem(this.getAttribute('data-id'), this.getAttribute('data-name'), parseInt(this.getAttribute('data-price'), 10));
+                    });
+                });
+            }
+
+            function addItem(id, name, price) {
+                if (!order[id]) {
+                    order[id] = { name: name, price: price, qty: 0 };
+                }
+                order[id].qty++;
+                updateOrderSummary();
+            }
+
+            function updateOrderSummary() {
+                var total = 0;
+                var html = '';
+                for (var id in order) {
+                    if (order[id].qty > 0) {
+                        var subtotal = order[id].price * order[id].qty;
+                        total += subtotal;
+                        html += '<div class="order-item">' +
+                            '<span><span class="order-item-qty">' + order[id].qty + 'x</span> ' + order[id].name + '</span>' +
+                            '<span>$' + subtotal + '</span></div>';
+                    }
+                }
+                if (html) {
+                    orderItems.innerHTML = html;
+                    btnSend.disabled = false;
+                } else {
+                    orderItems.innerHTML = '<p class="empty-order">Sin artículos</p>';
+                    btnSend.disabled = true;
+                }
+                orderTotal.textContent = '$' + total;
+            }
+
+            function openModal(tableNum) {
+                selectedTable = tableNum;
+                order = {};
+                modalTitle.textContent = 'Mesa ' + tableNum;
+                renderMenu();
+                updateOrderSummary();
+                modalOverlay.classList.add('open');
+                if (tableButtons[tableNum]) {
+                    tableButtons[tableNum].classList.add('selected');
+                }
+            }
+
+            function closeModal() {
+                modalOverlay.classList.remove('open');
+                if (selectedTable && tableButtons[selectedTable]) {
+                    tableButtons[selectedTable].classList.remove('selected');
+                }
+                selectedTable = null;
+                order = {};
+            }
+
+            function showToast() {
+                toast.classList.add('show');
+                setTimeout(function () {
+                    toast.classList.remove('show');
+                }, 2500);
+            }
+
+            // 3. Enviar orden a db.collection('ordenes')
+            function sendOrder() {
+                if (!selectedTable || Object.keys(order).length === 0) return;
+                var user = auth.currentUser;
+                if (!user) return;
+                var total = 0;
+                var platillos = [];
+                for (var id in order) {
+                    if (order[id].qty > 0) {
+                        var subtotal = order[id].price * order[id].qty;
+                        total += subtotal;
+                        platillos.push({
+                            nombre: order[id].name,
+                            precio: order[id].price,
+                            cantidad: order[id].qty
+                        });
+                    }
+                }
+                db.collection('ordenes').add({
+                    mesa: String(selectedTable),
+                    platillos: platillos,
+                    total: total,
+                    estado: 'pendiente',
+                    meseroId: user.uid,
+                    meseroNombre: meseroNombre || user.displayName || user.email || 'Mesero',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(function () {
+                    showToast();
+                    closeModal();
+                }).catch(function (err) {
+                    console.error('Error al guardar orden:', err);
+                });
+            }
+
+            modalClose.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', function (e) {
+                if (e.target === modalOverlay) closeModal();
+            });
+            btnSend.addEventListener('click', sendOrder);
+        })();
+    </script>
+
+</body>
+
+</html>
