@@ -245,7 +245,7 @@
                     opciones += '<button type="button" class="btn-sm btn-primary" data-id="' + id + '" data-estado="pagada">Pagada</button>';
                 }
                 rows.push(
-                    '<tr><td>' + escapeHtml(mesa) + '</td><td>' + escapeHtml(mesero) + '</td><td>' + escapeHtml(platillos) + '</td><td>' + total + '</td><td><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td>' + opciones + '</td></tr>'
+                    '<tr><td data-label="Mesa">' + escapeHtml(mesa) + '</td><td data-label="Mesero">' + escapeHtml(mesero) + '</td><td data-label="Platillos">' + escapeHtml(platillos) + '</td><td data-label="Total">' + total + '</td><td data-label="Estado"><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td data-label="Acciones">' + opciones + '</td></tr>'
                 );
             });
         }
