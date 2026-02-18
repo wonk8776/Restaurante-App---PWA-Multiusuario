@@ -373,27 +373,37 @@
 
             .nav-list {
                 display: flex;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 gap: 0.25rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-list::-webkit-scrollbar {
+                display: none;
+            }
+
+            .nav-list {
+                scrollbar-width: none;
             }
 
             .nav-list li {
                 margin: 0;
+                flex-shrink: 0;
             }
 
             .nav-list a {
-                padding: 0.5rem 0.75rem;
-                font-size: 0.85rem;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
             }
 
             .header {
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
+                padding: 0.75rem 1rem;
             }
 
             .admin-name {
-                width: 100%;
-                order: 3;
-                margin-top: 0.5rem;
+                display: none;
             }
 
             .dashboard-cards {
@@ -408,6 +418,63 @@
         @media (max-width: 480px) {
             .dashboard-cards {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tablas como tarjetas en móvil (solo órdenes y menú) */
+        @media (max-width: 600px) {
+            #section-ordenes .table-wrap thead,
+            #section-menu .table-wrap thead {
+                display: none;
+            }
+
+            #section-ordenes .table-wrap tbody tr,
+            #section-menu .table-wrap tbody tr {
+                display: block;
+                border: 1px solid #333;
+                border-radius: 8px;
+                margin-bottom: 0.75rem;
+                padding: 0.75rem;
+                background: var(--color-card);
+            }
+
+            #section-ordenes .table-wrap tbody tr:hover td,
+            #section-menu .table-wrap tbody tr:hover td {
+                background: transparent;
+            }
+
+            #section-ordenes .table-wrap tbody td,
+            #section-menu .table-wrap tbody td {
+                display: block;
+                padding: 0.4rem 0;
+                border-bottom: none;
+            }
+
+            #section-ordenes .table-wrap tbody td.msg-empty::before,
+            #section-menu .table-wrap tbody td.msg-empty::before {
+                display: none;
+            }
+
+            #section-ordenes .table-wrap tbody td:nth-child(1)::before { content: "Mesa"; }
+            #section-ordenes .table-wrap tbody td:nth-child(2)::before { content: "Mesero"; }
+            #section-ordenes .table-wrap tbody td:nth-child(3)::before { content: "Platillos"; }
+            #section-ordenes .table-wrap tbody td:nth-child(4)::before { content: "Total"; }
+            #section-ordenes .table-wrap tbody td:nth-child(5)::before { content: "Estado"; }
+            #section-ordenes .table-wrap tbody td:nth-child(6)::before { content: "Acciones"; }
+
+            #section-menu .table-wrap tbody td:nth-child(1)::before { content: "Nombre"; }
+            #section-menu .table-wrap tbody td:nth-child(2)::before { content: "Precio"; }
+            #section-menu .table-wrap tbody td:nth-child(3)::before { content: "Acciones"; }
+
+            #section-ordenes .table-wrap tbody td::before,
+            #section-menu .table-wrap tbody td::before {
+                display: block;
+                color: var(--color-primary);
+                font-weight: 700;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 0.15rem;
             }
         }
     </style>

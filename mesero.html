@@ -122,7 +122,21 @@
             gap: 0.75rem;
         }
 
-        @media (min-width: 480px) {
+        @media (max-width: 479px) {
+            .tables-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.75rem;
+            }
+        }
+
+        @media (min-width: 480px) and (max-width: 768px) {
+            .tables-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 769px) {
             .tables-grid {
                 grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
                 gap: 1rem;
@@ -140,6 +154,11 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
+            min-height: 60px;
+            min-width: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .table-btn:hover {
@@ -183,6 +202,43 @@
             display: flex;
             flex-direction: column;
             border: 1px solid #333;
+        }
+
+        @media (max-width: 768px) {
+            .modal-overlay {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .modal {
+                width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+
+            .modal-header {
+                flex-shrink: 0;
+            }
+
+            .modal-body {
+                flex: 1;
+                min-height: 0;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .order-summary {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .btn-send {
+                position: sticky;
+                bottom: 0;
+                margin-top: 1rem;
+            }
         }
 
         .modal-header {
@@ -237,10 +293,12 @@
             background: #2C2C2C;
             border-radius: 6px;
             margin-bottom: 0.5rem;
+            min-height: 60px;
         }
 
         .menu-item-info {
             flex: 1;
+            min-width: 0;
         }
 
         .menu-item-name {
@@ -254,8 +312,10 @@
         }
 
         .btn-add {
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            min-height: 44px;
             border-radius: 50%;
             background: var(--color-primary);
             color: var(--color-bg);
@@ -405,6 +465,7 @@
         .order-card-mesa {
             font-weight: 700;
             color: var(--color-primary);
+            min-width: 0;
         }
 
         .order-card-estado {
@@ -413,18 +474,21 @@
             border-radius: 4px;
             font-weight: 700;
             text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .order-card-platillos {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .estado-pendiente { background: rgba(255, 152, 0, 0.3); color: #FF9800; }
         .estado-preparacion { background: rgba(33, 150, 243, 0.3); color: #2196F3; }
         .estado-listo { background: rgba(76, 175, 80, 0.3); color: #4CAF50; }
         .estado-entregado { background: rgba(158, 158, 158, 0.3); color: #9E9E9E; }
-
-        .order-card-platillos {
-            font-size: 0.9rem;
-            color: var(--color-text-muted);
-            margin-bottom: 0.5rem;
-        }
 
         .order-card-total {
             font-weight: 700;
@@ -435,6 +499,31 @@
             color: var(--color-text-muted);
             font-style: italic;
             padding: 1rem 0;
+        }
+
+        /* Header móvil: una línea, nombre achicable */
+        @media (max-width: 768px) {
+            header {
+                flex-wrap: nowrap;
+                padding: 0.75rem 1rem;
+            }
+
+            .header-right {
+                flex-shrink: 1;
+                min-width: 0;
+            }
+
+            .waiter-name {
+                font-size: 0.8rem;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .btn-logout {
+                flex-shrink: 0;
+            }
         }
     </style>
 </head>
