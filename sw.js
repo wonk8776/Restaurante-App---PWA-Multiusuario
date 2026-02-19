@@ -26,6 +26,7 @@ self.addEventListener('activate', function (event) {
   );
 });
 
+// El evento fetch es obligatorio para que Chrome considere la PWA instalable.
 self.addEventListener('fetch', function (event) {
   var url = new URL(event.request.url);
   if (url.origin !== self.location.origin) {
