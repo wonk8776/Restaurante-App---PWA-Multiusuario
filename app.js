@@ -298,20 +298,20 @@
 
     function aplicarFiltroOrdenes() {
         if (!todasLasOrdenes) return;
+        var docsfiltrados = [];
+        todasLasOrdenes.forEach(function (doc) {
+            var estado = (doc.data().estado || '').toLowerCase();
+            var esPagada = estado === 'pagada';
+            if (filtroOrdenActual === 'activas' && !esPagada) {
+                docsfiltrados.push(doc);
+            } else if (filtroOrdenActual === 'pagadas' && esPagada) {
+                docsfiltrados.push(doc);
+            }
+        });
         var filtradas = {
-            empty: true,
+            empty: docsfiltrados.length === 0,
             forEach: function (cb) {
-                todasLasOrdenes.forEach(function (doc) {
-                    var estado = (doc.data().estado || '').toLowerCase();
-                    var esPagada = estado === 'pagada';
-                    if (filtroOrdenActual === 'activas' && !esPagada) {
-                        filtradas.empty = false;
-                        cb(doc);
-                    } else if (filtroOrdenActual === 'pagadas' && esPagada) {
-                        filtradas.empty = false;
-                        cb(doc);
-                    }
-                });
+                docsfiltrados.forEach(cb);
             }
         };
         renderOrdenes(filtradas);
