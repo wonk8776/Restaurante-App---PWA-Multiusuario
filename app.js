@@ -562,4 +562,101 @@
 
     // --- Iniciar listeners dashboard ---
     escucharDashboard();
+
+    // Cards del dashboard clickeables → navegación
+    var cardVentas = document.getElementById('ventasDia');
+    if (cardVentas) {
+        cardVentas.closest('.card').addEventListener('click', function () {
+            mostrarSeccion('reportes');
+        });
+    }
+    var cardGastos = document.getElementById('gastosDia');
+    if (cardGastos) {
+        cardGastos.closest('.card').addEventListener('click', function () {
+            mostrarSeccion('gastos');
+        });
+    }
+    var cardOrdenes = document.getElementById('ordenesActivas');
+    if (cardOrdenes) {
+        cardOrdenes.closest('.card').addEventListener('click', function () {
+            mostrarSeccion('ordenes');
+        });
+    }
+
+    // --- Historial de gastos ---
+    var gastosHistorialBody = document.getElementById('gastosHistorialBody');
+    var modalEditarGasto = document.getElementById('modalEditarGasto');
+    var editGastoDescripcion = document.getElementById('editGastoDescripcion');
+    var editGastoCategoria = document.getElementById('editGastoCategoria');
+    var editGastoMonto = document.getElementById('editGastoMonto');
+    var editGastoMetodo = document.getElementById('editGastoMetodo');
+    var btnGuardarEditGasto = document.getElementById('btnGuardarEditGasto');
+    var btnCancelarEditGasto = document.getElementById('btnCancelarEditGasto');
+    var gastoEditandoId = null;
+
+    db.collection('gastos').orderBy('fecha', 'desc').onSnapshot(function (snap) {
+        if (!gastosHistorialBody) return;
+        if (snap.empty) {
+            gastosHistorialBody.innerHTML = '<tr><td colspan="6" class="msg-empty">Sin gastos registrados.</td></tr>';
+            return;
+        }
+        var rows = [];
+        snap.forEach(function (d) {
+            var g = d.data();
+            var fecha = g.fecha && g.fecha.toDate ? g.fecha.toDate().toLocaleDateString('es') : '—';
+            var desc = escapeHtml(g.descripcion || '—');
+            var cat = escapeHtml(g.categoria || '—');
+            var monto = g.monto != null ? '$' + Number(g.monto).toFixed(2) : '—';
+            var metodo = escapeHtml(g.metodoPago || '—');
+            rows.push(
+                '<tr>' +
+                '<td data-label="Fecha">' + fecha + '</td>' +
+                '<td data-label="Descripción">' + desc + '</td>' +
+                '<td data-label="Categoría">' + cat + '</td>' +
+                '<td data-label="Monto">' + monto + '</td>' +
+                '<td data-label="Método">' + metodo + '</td>' +
+                '<td data-label="Acciones">' +
+                '<button type="button" class="btn-sm btn-secondary editar-gasto" data-id="' + d.id + '" data-desc="' + escapeHtml(g.descripcion || '') + '" data-cat="' + escapeHtml(g.categoria || 'otros') + '" data-monto="' + (g.monto || 0) + '" data-metodo="' + escapeHtml(g.metodoPago || 'efectivo') + '">Editar</button>' +
+                '</td>' +
+                '</tr>'
+            );
+        });
+        gastosHistorialBody.innerHTML = rows.join('');
+        gastosHistorialBody.querySelectorAll('.editar-gasto').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                gastoEditandoId = btn.getAttribute('data-id');
+                editGastoDescripcion.value = btn.getAttribute('data-desc');
+                editGastoCategoria.value = btn.getAttribute('data-cat');
+                editGastoMonto.value = btn.getAttribute('data-monto');
+                editGastoMetodo.value = btn.getAttribute('data-metodo');
+                modalEditarGasto.style.display = 'flex';
+            });
+        });
+    });
+
+    if (btnGuardarEditGasto) {
+        btnGuardarEditGasto.addEventListener('click', function () {
+            if (!gastoEditandoId) return;
+            var monto = parseFloat(editGastoMonto.value);
+            if (isNaN(monto) || monto <= 0) return;
+            db.collection('gastos').doc(gastoEditandoId).update({
+                descripcion: editGastoDescripcion.value.trim(),
+                categoria: editGastoCategoria.value,
+                monto: monto,
+                metodoPago: editGastoMetodo.value
+            }).then(function () {
+                modalEditarGasto.style.display = 'none';
+                gastoEditandoId = null;
+            }).catch(function (err) {
+                console.error('Error al editar gasto:', err);
+            });
+        });
+    }
+
+    if (btnCancelarEditGasto) {
+        btnCancelarEditGasto.addEventListener('click', function () {
+            modalEditarGasto.style.display = 'none';
+            gastoEditandoId = null;
+        });
+    }
 })();

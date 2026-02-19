@@ -174,6 +174,22 @@
             border: 1px solid #333;
             border-radius: 8px;
             padding: 1.25rem;
+            cursor: default;
+        }
+
+        #section-dashboard .card[data-clickable="true"] {
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.1s;
+        }
+
+        #section-dashboard .card[data-clickable="true"]:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+        }
+
+        #section-dashboard .card[data-clickable="true"]:active {
+            transform: scale(0.98);
+            opacity: 0.85;
         }
 
         .card-title {
@@ -703,11 +719,11 @@
                 <!-- Dashboard -->
                 <section id="section-dashboard" class="section active">
                     <div class="dashboard-cards">
-                        <div class="card">
+                        <div class="card" data-clickable="true">
                             <div class="card-title">Ventas del día</div>
                             <div class="card-value" id="ventasDia">$0</div>
                         </div>
-                        <div class="card">
+                        <div class="card" data-clickable="true">
                             <div class="card-title">Gastos del día</div>
                             <div class="card-value" id="gastosDia">$0</div>
                         </div>
@@ -715,7 +731,7 @@
                             <div class="card-title">Ganancia neta</div>
                             <div class="card-value" id="gananciaNeta">$0</div>
                         </div>
-                        <div class="card">
+                        <div class="card" data-clickable="true">
                             <div class="card-title">Órdenes activas</div>
                             <div class="card-value" id="ordenesActivas">0</div>
                         </div>
@@ -845,6 +861,64 @@
                     </div>
                     <button type="button" class="btn" id="btnRegistrarGasto">Registrar gasto</button>
                     <p id="gastoOk" style="color:#4CAF50;margin-top:0.5rem;display:none;">Gasto registrado.</p>
+                    <div style="margin-top: 2rem;">
+                        <h3 style="font-family:var(--font-heading);color:var(--color-primary);margin-bottom:1rem;">
+                            Historial de gastos
+                        </h3>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Descripción</th>
+                                        <th>Categoría</th>
+                                        <th>Monto</th>
+                                        <th>Método</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gastosHistorialBody">
+                                    <tr><td colspan="6" class="msg-empty">Cargando historial...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Modal editar gasto -->
+                    <div id="modalEditarGasto" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:300; align-items:center; justify-content:center; padding:1rem;">
+                        <div style="background:var(--color-card); border-radius:8px; padding:1.5rem; width:100%; max-width:400px; border:1px solid #333;">
+                            <h3 style="font-family:var(--font-heading);color:var(--color-primary);margin-bottom:1rem;">Editar gasto</h3>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <input type="text" id="editGastoDescripcion">
+                            </div>
+                            <div class="form-group">
+                                <label>Categoría</label>
+                                <select id="editGastoCategoria">
+                                    <option value="insumos">Insumos</option>
+                                    <option value="personal">Personal</option>
+                                    <option value="servicios">Servicios</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Monto ($)</label>
+                                <input type="number" id="editGastoMonto" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Método de pago</label>
+                                <select id="editGastoMetodo">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="transferencia">Transferencia</option>
+                                </select>
+                            </div>
+                            <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+                                <button type="button" class="btn" id="btnGuardarEditGasto">Guardar</button>
+                                <button type="button" class="btn btn-secondary" id="btnCancelarEditGasto">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Reportes -->
