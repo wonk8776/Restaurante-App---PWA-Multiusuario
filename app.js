@@ -245,7 +245,7 @@
                     opciones += '<button type="button" class="btn-sm btn-primary" data-id="' + id + '" data-estado="pagada">Pagada</button>';
                 }
                 opciones += ' <button type="button" class="btn-sm btn-whatsapp" data-id="' + id + '" title="Enviar por WhatsApp">WhatsApp</button>';
-                opciones += ' <button type="button" class="btn-sm btn-print" data-id="' + id + '" title="Imprimir ticket">Imprimir</button>';
+                opciones += ' <button type="button" class="btn-sm btn-danger eliminar-orden" data-id="' + id + '" title="Eliminar orden">Eliminar</button>';
                 rows.push(
                     '<tr><td data-label="Mesa">' + escapeHtml(mesa) + '</td><td data-label="Mesero">' + escapeHtml(mesero) + '</td><td data-label="Platillos">' + escapeHtml(platillos) + '</td><td data-label="Total">' + total + '</td><td data-label="Estado"><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td data-label="Acciones">' + opciones + '</td></tr>'
                 );
@@ -264,11 +264,14 @@
                 }
             });
         });
-        ordenesBody.querySelectorAll('.btn-print[data-id]').forEach(function (btn) {
+        ordenesBody.querySelectorAll('.eliminar-orden[data-id]').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                if (typeof window.prepararTicket === 'function') {
-                    window.prepararTicket(btn.getAttribute('data-id'));
-                }
+                var id = btn.getAttribute('data-id');
+                if (!confirm('¿Eliminar esta orden permanentemente? Esta acción no se puede deshacer.')) return;
+                db.collection('ordenes').doc(id).delete().catch(function (err) {
+                    console.error('Error al eliminar orden:', err);
+                    alert('No se pudo eliminar la orden.');
+                });
             });
         });
     }
@@ -280,12 +283,60 @@
         return div.innerHTML;
     }
 
+    var filtroOrdenActual = 'activas';
+    var btnFiltroActivas = document.getElementById('filtroActivas');
+    var btnFiltroPagadas = document.getElementById('filtroPagadas');
+    var todasLasOrdenes = [];
+
     db.collection('ordenes').onSnapshot(function (snap) {
-        renderOrdenes(snap);
+        todasLasOrdenes = snap;
+        aplicarFiltroOrdenes();
     }, function (err) {
         if (ordenesBody) ordenesBody.innerHTML = '<tr><td colspan="6" class="msg-empty">Error al cargar órdenes.</td></tr>';
         console.error(err);
     });
+
+    function aplicarFiltroOrdenes() {
+        if (!todasLasOrdenes) return;
+        var filtradas = {
+            empty: true,
+            forEach: function (cb) {
+                todasLasOrdenes.forEach(function (doc) {
+                    var estado = (doc.data().estado || '').toLowerCase();
+                    var esPagada = estado === 'pagada';
+                    if (filtroOrdenActual === 'activas' && !esPagada) {
+                        filtradas.empty = false;
+                        cb(doc);
+                    } else if (filtroOrdenActual === 'pagadas' && esPagada) {
+                        filtradas.empty = false;
+                        cb(doc);
+                    }
+                });
+            }
+        };
+        renderOrdenes(filtradas);
+    }
+
+    if (btnFiltroActivas) {
+        btnFiltroActivas.addEventListener('click', function () {
+            filtroOrdenActual = 'activas';
+            btnFiltroActivas.style.opacity = '1';
+            btnFiltroPagadas.style.opacity = '0.6';
+            btnFiltroActivas.className = 'btn';
+            btnFiltroPagadas.className = 'btn btn-secondary';
+            aplicarFiltroOrdenes();
+        });
+    }
+    if (btnFiltroPagadas) {
+        btnFiltroPagadas.addEventListener('click', function () {
+            filtroOrdenActual = 'pagadas';
+            btnFiltroPagadas.style.opacity = '1';
+            btnFiltroActivas.style.opacity = '0.6';
+            btnFiltroPagadas.className = 'btn';
+            btnFiltroActivas.className = 'btn btn-secondary';
+            aplicarFiltroOrdenes();
+        });
+    }
 
     // --- Menú ---
     function agregarPlatillo(nombre, precio) {
@@ -434,15 +485,31 @@
         if (!meserosBody) return;
         var rows = [];
         if (snap.empty) {
-            rows.push('<tr><td colspan="2" class="msg-empty">No hay meseros registrados.</td></tr>');
+            rows.push('<tr><td colspan="3" class="msg-empty">No hay meseros registrados.</td></tr>');
         } else {
             snap.forEach(function (d) {
                 var data = d.data();
-                rows.push('<tr><td>' + escapeHtml(data.nombre || '-') + '</td><td>' + escapeHtml(data.email || '-') + '</td></tr>');
+                rows.push('<tr><td>' + escapeHtml(data.nombre || '-') + '</td><td>' + escapeHtml(data.email || '-') + '</td><td><button type="button" class="btn-sm btn-danger eliminar-mesero" data-id="' + d.id + '" data-nombre="' + escapeHtml(data.nombre || '') + '">Eliminar</button></td></tr>');
             });
         }
         meserosBody.innerHTML = rows.join('');
     });
+
+    if (meserosBody) {
+        meserosBody.addEventListener('click', function (e) {
+            var btn = e.target.closest('.eliminar-mesero');
+            if (!btn) return;
+            var id = btn.getAttribute('data-id');
+            var nombre = btn.getAttribute('data-nombre') || 'este mesero';
+            if (!confirm('¿Eliminar a ' + nombre + '? Perderá acceso al sistema inmediatamente.')) return;
+            db.collection('usuarios').doc(id).delete().then(function () {
+                alert('Mesero eliminado de la base de datos. Para revocar el acceso de Firebase Auth completamente, elimínalo también en Firebase Console → Authentication → Users.');
+            }).catch(function (err) {
+                console.error('Error al eliminar mesero:', err);
+                alert('No se pudo eliminar el mesero.');
+            });
+        });
+    }
 
     if (btnCrearMesero) {
         btnCrearMesero.addEventListener('click', function () {

@@ -740,6 +740,14 @@
 
                 <!-- Órdenes en vivo -->
                 <section id="section-ordenes" class="section">
+                    <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+                        <button type="button" class="btn" id="filtroActivas" style="opacity:1;">
+                            Activas
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="filtroPagadas" style="opacity:0.6;">
+                            Pagadas
+                        </button>
+                    </div>
                     <div class="table-wrap">
                         <table>
                             <thead>
@@ -822,10 +830,11 @@
                                 <tr>
                                     <th>Nombre</th>
                                     <th>Correo</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="meserosBody">
-                                <tr><td colspan="2" class="msg-empty">Cargando meseros…</td></tr>
+                                <tr><td colspan="3" class="msg-empty">Cargando meseros…</td></tr>
                             </tbody>
                         </table>
                     </div>

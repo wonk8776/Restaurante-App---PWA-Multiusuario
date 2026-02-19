@@ -809,17 +809,11 @@
                             '<div class="order-card-total">Total: $' + (o.total != null ? o.total : 0) + '</div>' +
                             '<div class="order-card-actions">' +
                             '<button type="button" class="btn-whatsapp-mesero" title="Enviar por WhatsApp">WhatsApp</button>' +
-                            '<button type="button" class="btn-print-mesero" title="Imprimir ticket">Imprimir</button>' +
                             '</div>';
                         myOrdersList.appendChild(card);
                         card.querySelector('.btn-whatsapp-mesero').addEventListener('click', function () {
                             if (typeof window.enviarWhatsApp === 'function') {
                                 window.enviarWhatsApp(card.getAttribute('data-orden-id'));
-                            }
-                        });
-                        card.querySelector('.btn-print-mesero').addEventListener('click', function () {
-                            if (typeof window.prepararTicket === 'function') {
-                                window.prepararTicket(card.getAttribute('data-orden-id'));
                             }
                         });
                     });
