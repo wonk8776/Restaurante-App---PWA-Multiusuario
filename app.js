@@ -302,7 +302,7 @@
                 var nombre = data.nombre || '';
                 var precio = (data.precio != null) ? '$' + Number(data.precio).toFixed(2) : '';
                 rows.push(
-                    '<tr><td>' + escapeHtml(nombre) + '</td><td>' + precio + '</td><td>' +
+                    '<tr><td data-label="Nombre">' + escapeHtml(nombre) + '</td><td data-label="Precio">' + precio + '</td><td data-label="Acciones">' +
                     '<button type="button" class="btn-sm btn-secondary editar-platillo" data-id="' + id + '" data-nombre="' + escapeHtml(nombre) + '" data-precio="' + (data.precio != null ? data.precio : '') + '">Editar</button> ' +
                     '<button type="button" class="btn-sm btn-danger eliminar-platillo" data-id="' + id + '">Eliminar</button></td></tr>'
                 );
@@ -508,7 +508,7 @@
             var rows = [];
             reporteVentas.forEach(function (v) {
                 var f = v.fecha ? (v.fecha.getFullYear() + '-' + String(v.fecha.getMonth() + 1).padStart(2, '0') + '-' + String(v.fecha.getDate()).padStart(2, '0') + ' ' + v.fecha.toLocaleTimeString('es')) : '-';
-                rows.push('<tr><td>' + f + '</td><td>' + escapeHtml(v.mesa) + '</td><td>' + escapeHtml(v.mesero) + '</td><td>$' + Number(v.total).toFixed(2) + '</td></tr>');
+                rows.push('<tr><td data-label="Fecha">' + f + '</td><td data-label="Mesa">' + escapeHtml(v.mesa) + '</td><td data-label="Mesero">' + escapeHtml(v.mesero) + '</td><td data-label="Total">$' + Number(v.total).toFixed(2) + '</td></tr>');
             });
             if (rows.length === 0) {
                 rows.push('<tr><td colspan="4" class="msg-empty">No hay ventas en este período.</td></tr>');

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurante Pro - Panel Admin</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#D4AF37">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -354,129 +354,229 @@
             text-align: center;
         }
 
+        /* ========== MÓVIL (max-width: 768px) — App nativa ========== */
         @media (max-width: 768px) {
-            .app-layout { flex-direction: column; }
-
+            .app-layout {
+                flex-direction: column;
+            }
             .sidebar {
                 width: 100%;
-                padding: 0.5rem;
                 border-right: none;
                 border-bottom: 1px solid #333;
+                padding: 0.5rem 1rem;
             }
-
-            .sidebar .logo { margin-bottom: 0.5rem; }
-
+            .sidebar .logo {
+                margin-bottom: 0.5rem;
+            }
             .nav-list {
-                display: flex !important;
-                flex-direction: row !important;
-                flex-wrap: nowrap !important;
+                display: flex;
+                flex-flow: row nowrap;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
-                padding-bottom: 2px;
+                padding-bottom: 4px;
+                list-style: none;
             }
-
-            .nav-list::-webkit-scrollbar { display: none; }
-
-            .nav-list li { flex-shrink: 0; margin: 0; }
-
+            .nav-list::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-list li {
+                flex-shrink: 0;
+                margin: 0;
+            }
             .nav-list a {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.8rem;
                 white-space: nowrap;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
                 border-left: none !important;
                 border-bottom: 2px solid transparent;
             }
-
             .nav-list a.active {
                 border-left: none !important;
                 border-bottom: 2px solid var(--color-primary);
+                background: rgba(212, 175, 55, 0.1);
             }
-
+            .nav-list {
+                scroll-behavior: smooth;
+                position: relative;
+                -webkit-mask-image: linear-gradient(to right, black 0%, black calc(100% - 32px), transparent 100%);
+                mask-image: linear-gradient(to right, black 0%, black calc(100% - 32px), transparent 100%);
+            }
             .header {
-                display: flex !important;
-                flex-direction: row !important;
-                flex-wrap: nowrap !important;
-                align-items: center !important;
-                justify-content: space-between !important;
-                padding: 0.75rem 1rem;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.4rem 1rem;
             }
-
             .header h2 {
                 font-size: 1rem;
-                white-space: nowrap;
                 margin: 0;
-                flex: 1;
+                padding: 0.25rem 0;
             }
-
-            #adminName { display: none !important; }
-
+            .section-toolbar {
+                margin-bottom: 0.75rem;
+            }
+            .section-toolbar h3,
+            .section h3 {
+                margin-bottom: 0.5rem;
+            }
+            .content section:not(#section-dashboard) .section-toolbar h3 {
+                font-size: 1.05rem;
+            }
+            #adminName {
+                display: none !important;
+            }
             .btn-logout {
-                padding: 6px 10px !important;
-                font-size: 0.75rem !important;
-                white-space: nowrap;
-                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+                min-height: 44px;
             }
-
+            .content {
+                padding: 1rem;
+            }
             .dashboard-cards {
-                grid-template-columns: 1fr 1fr !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
             }
-
-            .content { padding: 1rem; }
-
-            .form-group input,
-            .form-group select { max-width: 100%; }
-        }
-
-        @media (max-width: 480px) {
-            .dashboard-cards { grid-template-columns: 1fr 1fr !important; }
-        }
-
-        @media (max-width: 600px) {
-            #section-ordenes .table-wrap {
+            .card-title,
+            .card-value {
+                text-align: center;
+            }
+            /* Tablas → Tarjetas (Órdenes, Menú, Reportes) */
+            #section-ordenes .table-wrap,
+            #section-menu .table-wrap,
+            #section-reportes .table-wrap {
                 border: none;
                 background: transparent;
             }
-
             #section-ordenes table,
             #section-ordenes thead,
             #section-ordenes tbody,
-            #section-ordenes tr {
+            #section-ordenes tr,
+            #section-menu table,
+            #section-menu thead,
+            #section-menu tbody,
+            #section-menu tr,
+            #section-reportes table,
+            #section-reportes thead,
+            #section-reportes tbody,
+            #section-reportes tr {
                 display: block;
                 width: 100%;
             }
-
-            #section-ordenes thead {
+            #section-ordenes thead,
+            #section-menu thead,
+            #section-reportes thead {
                 display: none;
             }
-
-            #section-ordenes tbody tr {
+            #section-ordenes tbody tr,
+            #section-menu tbody tr,
+            #section-reportes tbody tr {
                 background: var(--color-card);
-                border: 1px solid #444;
+                border: 1px solid #333;
                 border-radius: 8px;
                 margin-bottom: 1rem;
-                padding: 0.75rem;
+                padding: 0.75rem 1rem;
             }
-
-            #section-ordenes tbody td {
+            #section-ordenes tbody td,
+            #section-menu tbody td,
+            #section-reportes tbody td {
                 display: flex;
                 justify-content: space-between;
                 align-items: flex-start;
-                padding: 4px 0;
-                border: none;
+                padding: 6px 0;
+                border-bottom: 1px solid #2a2a2a;
                 font-size: 0.9rem;
             }
-
-            #section-ordenes tbody td::before {
+            #section-ordenes tbody td:last-child,
+            #section-menu tbody td:last-child,
+            #section-reportes tbody td:last-child {
+                border-bottom: none;
+            }
+            #section-ordenes tbody td::before,
+            #section-menu tbody td::before,
+            #section-reportes tbody td::before {
                 content: attr(data-label);
                 color: var(--color-primary);
                 font-weight: 700;
                 font-size: 0.8rem;
                 flex-shrink: 0;
-                margin-right: 1rem;
+                margin-right: 0.75rem;
             }
-
-            #section-ordenes tbody td.msg-empty::before {
+            #section-ordenes tbody td.msg-empty::before,
+            #section-menu tbody td.msg-empty::before,
+            #section-reportes tbody td.msg-empty::before {
                 display: none;
+            }
+            /* Botones Editar/Eliminar (y Acciones): gap 10px, área de clic amplia (mín. 44px) */
+            #section-ordenes tbody td[data-label="Acciones"],
+            #section-menu tbody td[data-label="Acciones"] {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: center;
+            }
+            #section-ordenes tbody td[data-label="Acciones"]::before,
+            #section-menu tbody td[data-label="Acciones"]::before {
+                width: 100%;
+                margin-bottom: 2px;
+            }
+            #section-ordenes tbody td[data-label="Acciones"] .btn-sm,
+            #section-menu tbody td[data-label="Acciones"] .btn-sm {
+                width: 48%;
+                min-width: 0;
+                min-height: 44px;
+                margin: 0;
+            }
+            /* Formularios: ancho completo y altura táctil mínima 44px */
+            .form-group input,
+            .form-group select,
+            .report-filters input,
+            .report-filters select {
+                width: 100%;
+                max-width: none;
+                min-height: 44px;
+                padding: 12px;
+            }
+            .form-group button,
+            .btn,
+            .report-filters .btn {
+                width: 100%;
+                min-height: 44px;
+                padding: 12px;
+            }
+            .section-toolbar .btn,
+            #btnRegistrarGasto,
+            #btnFiltrarReporte,
+            #btnExportarPdf {
+                min-height: 44px;
+            }
+            /* Feedback táctil: active en botones principales */
+            .btn,
+            .btn-sm,
+            .btn-logout,
+            .btn-primary,
+            .btn-secondary,
+            .btn-danger,
+            .section-toolbar .btn,
+            #btnRegistrarGasto,
+            #btnFiltrarReporte,
+            #btnExportarPdf {
+                -webkit-tap-highlight-color: transparent;
+            }
+            .btn:active,
+            .btn-sm:active,
+            .btn-logout:active,
+            .btn-primary:active,
+            .btn-secondary:active,
+            .btn-danger:active,
+            .section-toolbar .btn:active,
+            #btnRegistrarGasto:active,
+            #btnFiltrarReporte:active,
+            #btnExportarPdf:active {
+                opacity: 0.7;
+                transform: scale(0.98);
             }
         }
     </style>
@@ -694,7 +794,7 @@
     <script src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+            navigator.serviceWorker.register('./sw.js').catch(function () {});
         }
     </script>
 </body>

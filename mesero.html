@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurante Pro - Panel Mesero</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#D4AF37">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -122,20 +122,6 @@
             gap: 0.75rem;
         }
 
-        @media (max-width: 479px) {
-            .tables-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 0.75rem;
-            }
-        }
-
-        @media (min-width: 480px) and (max-width: 768px) {
-            .tables-grid {
-                grid-template-columns: repeat(6, 1fr);
-                gap: 1rem;
-            }
-        }
-
         @media (min-width: 769px) {
             .tables-grid {
                 grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -208,18 +194,37 @@
             .modal-overlay {
                 padding: 0;
                 align-items: stretch;
+                justify-content: stretch;
             }
 
             .modal {
-                width: 100%;
-                height: 100%;
-                max-height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                max-width: none;
+                max-height: none;
                 border-radius: 0;
                 border: none;
+                display: flex;
+                flex-direction: column;
             }
 
             .modal-header {
                 flex-shrink: 0;
+                padding: 1rem 1.25rem;
+            }
+
+            .modal-title {
+                font-size: 1.25rem;
+            }
+
+            .modal-close {
+                font-size: 1.75rem;
+                min-width: 44px;
+                min-height: 44px;
+                padding: 0.5rem;
             }
 
             .modal-body {
@@ -227,17 +232,41 @@
                 min-height: 0;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
+                padding: 1rem 1.25rem;
+                display: flex;
+                flex-direction: column;
             }
 
             .order-summary {
                 display: flex;
                 flex-direction: column;
+                margin-top: auto;
             }
 
             .btn-send {
+                flex-shrink: 0;
+                width: 100%;
+                min-height: 50px;
+                margin-top: 1rem;
                 position: sticky;
                 bottom: 0;
-                margin-top: 1rem;
+            }
+
+            .btn-add {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .tables-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.75rem;
+            }
+
+            .table-btn {
+                min-height: 60px;
+                text-align: center;
             }
         }
 
@@ -501,14 +530,25 @@
             padding: 1rem 0;
         }
 
-        /* Header móvil: una línea, nombre achicable */
+        /* Header móvil: logo izquierda, usuario + logout derecha, una línea */
         @media (max-width: 768px) {
             header {
                 flex-wrap: nowrap;
                 padding: 0.75rem 1rem;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .logo {
+                flex-shrink: 0;
             }
 
             .header-right {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
                 flex-shrink: 1;
                 min-width: 0;
             }
@@ -523,6 +563,23 @@
 
             .btn-logout {
                 flex-shrink: 0;
+                min-height: 44px;
+            }
+            /* Feedback táctil: active en botones principales */
+            .btn-logout,
+            .btn-send,
+            .btn-add,
+            .modal-close,
+            .table-btn {
+                -webkit-tap-highlight-color: transparent;
+            }
+            .btn-logout:active,
+            .btn-send:active,
+            .btn-add:active,
+            .modal-close:active,
+            .table-btn:active {
+                opacity: 0.7;
+                transform: scale(0.98);
             }
         }
     </style>
@@ -816,7 +873,7 @@
     </script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+            navigator.serviceWorker.register('./sw.js').catch(function () {});
         }
     </script>
 </body>

@@ -1,34 +1,48 @@
-const CACHE_NAME = 'luxe-dining-v1';
+/**
+ * Service Worker - PWA Sistema Restaurante
+ * Estrategia: Network First (red primero, caché como respaldo)
+ * No se cachean peticiones a Firestore/Firebase.
+ */
+
+const CACHE_NAME = 'restaurante-pwa-v1';
+
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/login.html',
-  '/mesero.html',
-  '/auth.js',
-  '/firebase-config.js',
-  '/app.js',
-  '/manifest.json',
-  '/icons/icon-192.svg',
-  '/icons/icon-512.svg'
+  './index.html',
+  './mesero.html',
+  './login.html',
+  './app.js',
+  './auth.js',
+  './firebase-config.js',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-192.svg',
+  './icons/icon-512.svg'
 ];
 
-const FIREBASE_ORIGINS = [
-  'https://www.gstatic.com',
-  'https://fonts.googleapis.com',
-  'https://fonts.gstatic.com',
-  'https://firebaseapp.com',
-  'https://*.firebaseapp.com',
-  'https://*.googleapis.com'
-];
-
-function isFirebaseRequest(url) {
+function isFirestoreOrFirebase(url) {
   try {
     const u = new URL(url);
-    return u.origin.includes('gstatic.com') ||
-           u.origin.includes('googleapis.com') ||
-           u.origin.includes('gstatic.com') ||
-           u.hostname.endsWith('firebaseapp.com') ||
-           u.hostname.endsWith('firebaseio.com');
+    return u.hostname.includes('firestore.googleapis.com') ||
+           u.hostname.includes('firebaseio.com') ||
+           u.hostname.includes('identitytoolkit.googleapis.com') ||
+           u.hostname.includes('securetoken.googleapis.com');
+  } catch (_) {
+    return false;
+  }
+}
+
+function isStaticAsset(url) {
+  try {
+    const u = new URL(url);
+    if (u.origin !== self.location.origin) return false;
+    const path = u.pathname.toLowerCase();
+    return /\.(html|js|json|css|png|svg|ico|woff2?)$/i.test(path) ||
+           path === '/' || path.endsWith('/') ||
+           path.endsWith('index.html') || path === '/index.html' ||
+           path.includes('mesero.html') || path.includes('login.html') ||
+           path.includes('manifest.json') ||
+           path.includes('icons/');
   } catch (_) {
     return false;
   }
@@ -37,8 +51,8 @@ function isFirebaseRequest(url) {
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
-      return cache.addAll(STATIC_ASSETS.map(function (u) {
-        return new Request(u, { cache: 'reload' });
+      return cache.addAll(STATIC_ASSETS.map(function (path) {
+        return new Request(path, { cache: 'reload' });
       })).catch(function () {});
     }).then(function () {
       return self.skipWaiting();
@@ -58,29 +72,31 @@ self.addEventListener('activate', function (event) {
   );
 });
 
+// Network First: intentar red, si falla usar caché. No cachear Firestore.
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
 
-  if (isFirebaseRequest(event.request.url)) {
+  if (isFirestoreOrFirebase(event.request.url)) {
     event.respondWith(fetch(event.request));
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      if (cached) return cached;
-      return fetch(event.request).then(function (res) {
-        const url = new URL(event.request.url);
-        if (url.origin !== self.location.origin) return res;
-        const isStatic = /\.(html|js|json|css|png|svg|ico|woff2?)$/i.test(url.pathname) ||
-          url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '/login.html' || url.pathname === '/mesero.html';
-        if (!isStatic || !res.ok) return res;
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(function (cache) {
-          cache.put(event.request, clone);
+    fetch(event.request)
+      .then(function (response) {
+        if (!response.ok) return response;
+        if (isStaticAsset(event.request.url)) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function (cache) {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      })
+      .catch(function () {
+        return caches.match(event.request).then(function (cached) {
+          return cached || fetch(event.request);
         });
-        return res;
-      });
-    })
+      })
   );
 });
