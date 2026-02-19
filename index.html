@@ -618,6 +618,78 @@
             background: rgba(212, 175, 55, 0.15) !important;
         }
 
+        /* Órdenes en vivo: botones de acciones en una sola fila */
+        .orden-acciones {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 5px;
+            align-items: center;
+        }
+        .orden-acciones-flujo {
+            display: contents;
+        }
+        .orden-acciones-aux {
+            display: contents;
+        }
+        .orden-acciones .btn-sm {
+            padding: 5px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border-radius: 4px;
+            white-space: nowrap;
+            margin: 0;
+            flex-shrink: 0;
+        }
+        .orden-acciones .btn-estado-preparando,
+        .orden-acciones .btn-estado-servido,
+        .orden-acciones .btn-estado-pagada {
+            border: none;
+        }
+        .orden-acciones .btn-whatsapp {
+            background: transparent !important;
+            border: 1px solid #25d366;
+            color: #25d366;
+        }
+        .orden-acciones .btn-danger {
+            background: transparent !important;
+            border: 1px solid #CF6679;
+            color: #CF6679;
+        }
+        .btn-estado-preparando {
+            background: #D4AF37 !important;
+            color: #121212 !important;
+        }
+        .btn-estado-servido {
+            background: #2196F3 !important;
+            color: #ffffff !important;
+        }
+        .btn-estado-pagada {
+            background: #4CAF50 !important;
+            color: #ffffff !important;
+        }
+        @media (max-width: 768px) {
+            .orden-acciones {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 4px;
+                align-items: center;
+                width: 100%;
+            }
+            .orden-acciones .btn-sm {
+                flex: 1 1 0;
+                min-width: 0;
+                min-height: 38px;
+                font-size: 0.68rem;
+                font-weight: 700;
+                padding: 4px 4px;
+                white-space: nowrap;
+                text-align: center;
+                margin: 0;
+            }
+        }
+
         /* Contenido del ticket (oculto en pantalla; solo para impresión) */
         #ticket-container { display: none; }
 

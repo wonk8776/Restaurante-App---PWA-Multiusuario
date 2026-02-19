@@ -234,18 +234,20 @@
                 }
                 var estado = data.estado || 'pendiente';
                 var clase = estadoToClass(estado);
-                var opciones = '';
-                if (estado.toLowerCase() !== 'pagada' && estado.toLowerCase() !== 'cancelada') {
+                var esPagadaOCancelada = estado.toLowerCase() === 'pagada' || estado.toLowerCase() === 'cancelada';
+                var flujoHtml = '';
+                if (!esPagadaOCancelada) {
                     if (estado.toLowerCase() !== 'preparando') {
-                        opciones += '<button type="button" class="btn-sm btn-primary" data-id="' + id + '" data-estado="preparando">Preparando</button>';
+                        flujoHtml += '<button type="button" class="btn-sm btn-estado-preparando" data-id="' + id + '" data-estado="preparando">Preparando</button>';
                     }
                     if (estado.toLowerCase() !== 'servido' && estado.toLowerCase() !== 'servida') {
-                        opciones += '<button type="button" class="btn-sm btn-primary" data-id="' + id + '" data-estado="servido">Servido</button>';
+                        flujoHtml += '<button type="button" class="btn-sm btn-estado-servido" data-id="' + id + '" data-estado="servido">Servido</button>';
                     }
-                    opciones += '<button type="button" class="btn-sm btn-primary" data-id="' + id + '" data-estado="pagada">Pagada</button>';
+                    flujoHtml += '<button type="button" class="btn-sm btn-estado-pagada" data-id="' + id + '" data-estado="pagada">Pagada</button>';
                 }
-                opciones += ' <button type="button" class="btn-sm btn-whatsapp" data-id="' + id + '" title="Enviar por WhatsApp">WhatsApp</button>';
-                opciones += ' <button type="button" class="btn-sm btn-danger eliminar-orden" data-id="' + id + '" title="Eliminar orden">Eliminar</button>';
+                var auxHtml = '<button type="button" class="btn-sm btn-whatsapp" data-id="' + id + '" title="Enviar por WhatsApp">WhatsApp</button>';
+                auxHtml += '<button type="button" class="btn-sm btn-danger eliminar-orden" data-id="' + id + '" title="Eliminar orden">Eliminar</button>';
+                var opciones = '<div class="orden-acciones"><div class="orden-acciones-flujo">' + flujoHtml + '</div><div class="orden-acciones-aux">' + auxHtml + '</div></div>';
                 rows.push(
                     '<tr><td data-label="Mesa">' + escapeHtml(mesa) + '</td><td data-label="Mesero">' + escapeHtml(mesero) + '</td><td data-label="Platillos">' + escapeHtml(platillos) + '</td><td data-label="Total">' + total + '</td><td data-label="Estado"><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td data-label="Acciones">' + opciones + '</td></tr>'
                 );
