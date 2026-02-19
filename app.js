@@ -244,6 +244,8 @@
                     }
                     opciones += '<button type="button" class="btn-sm btn-primary" data-id="' + id + '" data-estado="pagada">Pagada</button>';
                 }
+                opciones += ' <button type="button" class="btn-sm btn-whatsapp" data-id="' + id + '" title="Enviar por WhatsApp">WhatsApp</button>';
+                opciones += ' <button type="button" class="btn-sm btn-print" data-id="' + id + '" title="Imprimir ticket">Imprimir</button>';
                 rows.push(
                     '<tr><td data-label="Mesa">' + escapeHtml(mesa) + '</td><td data-label="Mesero">' + escapeHtml(mesero) + '</td><td data-label="Platillos">' + escapeHtml(platillos) + '</td><td data-label="Total">' + total + '</td><td data-label="Estado"><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td data-label="Acciones">' + opciones + '</td></tr>'
                 );
@@ -253,6 +255,20 @@
         ordenesBody.querySelectorAll('[data-id][data-estado]').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 cambiarEstadoOrden(btn.getAttribute('data-id'), btn.getAttribute('data-estado'));
+            });
+        });
+        ordenesBody.querySelectorAll('.btn-whatsapp[data-id]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (typeof window.enviarWhatsApp === 'function') {
+                    window.enviarWhatsApp(btn.getAttribute('data-id'));
+                }
+            });
+        });
+        ordenesBody.querySelectorAll('.btn-print[data-id]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (typeof window.prepararTicket === 'function') {
+                    window.prepararTicket(btn.getAttribute('data-id'));
+                }
             });
         });
     }

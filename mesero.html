@@ -530,15 +530,15 @@
             padding: 1rem 0;
         }
 
-        /* Header móvil: logo izquierda, usuario + logout derecha, una línea */
+        /* Header móvil: logo y nombre apilados; logout a la derecha */
         @media (max-width: 768px) {
             header {
                 flex-wrap: nowrap;
                 padding: 0.75rem 1rem;
                 display: flex;
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
+                flex-direction: column;
+                align-items: flex-start;
+                position: relative;
             }
 
             .logo {
@@ -546,23 +546,23 @@
             }
 
             .header-right {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                flex-shrink: 1;
-                min-width: 0;
+                display: contents;
             }
 
             .waiter-name {
                 font-size: 0.8rem;
                 min-width: 0;
+                max-width: 120px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
 
             .btn-logout {
-                flex-shrink: 0;
+                position: absolute;
+                right: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
                 min-height: 44px;
             }
             /* Feedback táctil: active en botones principales */
@@ -581,6 +581,81 @@
                 opacity: 0.7;
                 transform: scale(0.98);
             }
+        }
+
+        /* Botones WhatsApp e Imprimir en mis órdenes */
+        .order-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            align-items: center;
+        }
+        .btn-whatsapp-mesero {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            min-height: 44px;
+            background: rgba(37, 211, 102, 0.2);
+            color: #25d366;
+            border: 1px solid #25d366;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-whatsapp-mesero:hover {
+            background: rgba(37, 211, 102, 0.35);
+            color: #20bd5a;
+        }
+        .btn-print-mesero {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            min-height: 44px;
+            background: #2C2C2C;
+            color: var(--color-primary);
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .btn-print-mesero:hover {
+            border-color: var(--color-primary);
+            background: rgba(212, 175, 55, 0.15);
+        }
+
+        #ticket-container { display: none; }
+
+        /* Impresión térmica 80mm: no ocultar #ticket-container */
+        @media print {
+            body > *:not(#ticket-container) { display: none !important; visibility: hidden !important; }
+            #ticket-container {
+                display: block !important;
+                visibility: visible !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 80mm !important;
+                min-width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 !important;
+                padding: 4mm !important;
+                background: #fff !important;
+                color: #000 !important;
+                font-family: 'Courier New', Courier, monospace !important;
+                font-size: 11px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #ticket-container .ticket-paper { background: #fff !important; color: #000 !important; }
+            #ticket-container .ticket-logo { font-size: 14px !important; font-weight: bold !important; text-align: center !important; margin: 0 0 6px !important; color: #000 !important; }
+            #ticket-container .ticket-fecha,
+            #ticket-container .ticket-detalles { text-align: center !important; margin: 4px 0 !important; font-size: 10px !important; color: #000 !important; }
+            #ticket-container .ticket-tabla { width: 100% !important; border-collapse: collapse !important; margin: 6px 0 !important; font-size: 10px !important; }
+            #ticket-container .ticket-tabla th,
+            #ticket-container .ticket-tabla td { border: none !important; border-bottom: 1px dotted #000 !important; padding: 2px 4px !important; color: #000 !important; text-align: left !important; }
+            #ticket-container .ticket-total { font-weight: bold !important; font-size: 12px !important; margin: 8px 0 4px !important; color: #000 !important; }
+            #ticket-container .ticket-gracias { text-align: center !important; font-size: 10px !important; margin: 8px 0 0 !important; color: #000 !important; }
+            @page { size: 80mm auto; margin: 0; }
+            body { background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
 </head>
@@ -637,13 +712,16 @@
     <!-- Toast confirmación -->
     <div class="toast" id="toast">Orden enviada correctamente</div>
 
+    <div id="ticket-container" style="display:none;"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Firebase SDKs (Compat v9) -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
-
+    <script src="ticket.js"></script>
     <script>
         (function () {
             'use strict';
@@ -723,12 +801,27 @@
                         else if (estado === 'entregado') estadoClass = 'estado-entregado';
                         var card = document.createElement('div');
                         card.className = 'order-card';
+                        card.setAttribute('data-orden-id', doc.id);
                         card.innerHTML = '<div class="order-card-header">' +
                             '<span class="order-card-mesa">Mesa ' + (o.mesa || '—') + '</span>' +
                             '<span class="order-card-estado ' + estadoClass + '">' + (o.estado || 'pendiente') + '</span></div>' +
                             '<div class="order-card-platillos">' + platillosText + '</div>' +
-                            '<div class="order-card-total">Total: $' + (o.total != null ? o.total : 0) + '</div>';
+                            '<div class="order-card-total">Total: $' + (o.total != null ? o.total : 0) + '</div>' +
+                            '<div class="order-card-actions">' +
+                            '<button type="button" class="btn-whatsapp-mesero" title="Enviar por WhatsApp">WhatsApp</button>' +
+                            '<button type="button" class="btn-print-mesero" title="Imprimir ticket">Imprimir</button>' +
+                            '</div>';
                         myOrdersList.appendChild(card);
+                        card.querySelector('.btn-whatsapp-mesero').addEventListener('click', function () {
+                            if (typeof window.enviarWhatsApp === 'function') {
+                                window.enviarWhatsApp(card.getAttribute('data-orden-id'));
+                            }
+                        });
+                        card.querySelector('.btn-print-mesero').addEventListener('click', function () {
+                            if (typeof window.prepararTicket === 'function') {
+                                window.prepararTicket(card.getAttribute('data-orden-id'));
+                            }
+                        });
                     });
                 });
             });
