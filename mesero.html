@@ -159,6 +159,18 @@
             color: var(--color-primary);
         }
 
+        .table-btn.mesa-ocupada {
+            border-color: var(--color-primary) !important;
+            background: rgba(212,175,55,0.15) !important;
+            color: var(--color-primary) !important;
+        }
+        .table-btn.mesa-ocupada::after {
+            content: ' ●';
+            font-size: 0.6rem;
+            vertical-align: super;
+            color: var(--color-primary);
+        }
+
         /* Modal */
         .modal-overlay {
             display: none;
@@ -657,6 +669,115 @@
             @page { size: 80mm auto; margin: 0; }
             body { background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
+
+        .btn-agregar-mas {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            min-height: 44px;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-agregar-mas:hover {
+            background: rgba(212, 175, 55, 0.3);
+        }
+
+        .orden-platillo-fila {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 0.88rem;
+        }
+        .orden-platillo-fila:last-child {
+            border-bottom: none;
+        }
+        .orden-platillo-nombre {
+            flex: 1;
+            color: var(--color-text);
+        }
+        .orden-platillo-qty {
+            color: var(--color-primary);
+            font-weight: 700;
+            min-width: 28px;
+            text-align: center;
+        }
+        .orden-platillo-precio {
+            color: var(--color-text-muted);
+            font-size: 0.8rem;
+            min-width: 60px;
+            text-align: right;
+        }
+        .btn-qty {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border-radius: 50%;
+            border: 1px solid #444;
+            background: #2C2C2C;
+            color: var(--color-text);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s;
+        }
+        .btn-qty:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+        .btn-eliminar-platillo {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border-radius: 50%;
+            border: 1px solid var(--color-error, #CF6679);
+            background: transparent;
+            color: #CF6679;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-eliminar-platillo:hover {
+            background: rgba(207,102,121,0.15);
+        }
+
+        .orders-filter {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .orders-filter label {
+            color: var(--color-primary);
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .orders-filter input[type="date"] {
+            padding: 8px 12px;
+            background: #2C2C2C;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: var(--color-text);
+            font-size: 0.9rem;
+            min-height: 44px;
+        }
+        .orders-filter input[type="date"]:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+        .ordenes-count {
+            color: var(--color-text-muted);
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 
@@ -675,7 +796,12 @@
         <div class="tables-grid" id="tablesGrid"></div>
 
         <section class="my-orders-section">
-            <h2>Mis órdenes de hoy</h2>
+            <h2>Mis órdenes</h2>
+            <div class="orders-filter">
+                <label for="filtroFechaOrdenes">Fecha:</label>
+                <input type="date" id="filtroFechaOrdenes">
+                <span id="ordenesFechaCount" class="ordenes-count"></span>
+            </div>
             <div class="my-orders-list" id="myOrdersList">
                 <p class="my-orders-empty">Cargando...</p>
             </div>
@@ -731,6 +857,8 @@
             var tableButtons = {};
             var menuItems = [];
             var meseroNombre = '';
+            var editandoOrdenId = null;
+            var editandoPlatillosOriginales = [];
 
             // DOM
             var tablesGrid = document.getElementById('tablesGrid');
@@ -774,7 +902,8 @@
                         menuItems.push({
                             id: doc.id,
                             name: d.nombre || d.name || 'Sin nombre',
-                            price: typeof d.precio !== 'undefined' ? Number(d.precio) : (d.price ? Number(d.price) : 0)
+                            price: typeof d.precio !== 'undefined' ? Number(d.precio) : (d.price ? Number(d.price) : 0),
+                            categoria: d.categoria || 'Otros'
                         });
                     });
                     if (modalOverlay.classList.contains('open')) {
@@ -782,40 +911,190 @@
                     }
                 });
 
-                // 4. Órdenes del mesero en tiempo real
-                db.collection('ordenes').where('meseroId', '==', user.uid).onSnapshot(function (snapshot) {
+                // 4. Órdenes del mesero en tiempo real (con filtro de fecha)
+                var todasOrdenesmesero = null;
+                var filtroFechaInput = document.getElementById('filtroFechaOrdenes');
+                var ordenesCountSpan = document.getElementById('ordenesFechaCount');
+                if (filtroFechaInput) {
+                    var hoy = new Date();
+                    var yyyy = hoy.getFullYear();
+                    var mm = String(hoy.getMonth() + 1).padStart(2, '0');
+                    var dd = String(hoy.getDate()).padStart(2, '0');
+                    filtroFechaInput.value = yyyy + '-' + mm + '-' + dd;
+                }
+
+                function filtrarYRenderOrdenes() {
+                    var fechaStr = filtroFechaInput && filtroFechaInput.value ? filtroFechaInput.value.trim() : '';
+                    if (!fechaStr && filtroFechaInput) {
+                        var h = new Date();
+                        fechaStr = h.getFullYear() + '-' + String(h.getMonth() + 1).padStart(2, '0') + '-' + String(h.getDate()).padStart(2, '0');
+                    }
+                    var inicio = new Date(fechaStr + 'T00:00:00.000');
+                    var fin = new Date(fechaStr + 'T23:59:59.999');
+                    var docs = todasOrdenesmesero && todasOrdenesmesero.docs ? todasOrdenesmesero.docs : [];
+                    var filtrados = docs.filter(function (doc) {
+                        var d = doc.data();
+                        var ts = d.timestamp;
+                        var fecha = ts && ts.toDate ? ts.toDate() : null;
+                        if (fecha === null) return true;
+                        return fecha >= inicio && fecha <= fin;
+                    });
+
                     myOrdersList.innerHTML = '';
-                    if (snapshot.empty) {
-                        myOrdersList.innerHTML = '<p class="my-orders-empty">Aún no tienes órdenes hoy.</p>';
+                    if (filtrados.length === 0) {
+                        myOrdersList.innerHTML = '<p class="my-orders-empty">No hay órdenes para esta fecha.</p>';
+                        if (ordenesCountSpan) ordenesCountSpan.textContent = '0 orden(es) encontrada(s)';
                         return;
                     }
-                    snapshot.forEach(function (doc) {
+                    if (ordenesCountSpan) ordenesCountSpan.textContent = filtrados.length + ' orden(es) encontrada(s)';
+
+                    filtrados.forEach(function (doc) {
                         var o = doc.data();
-                        var platillosText = (o.platillos || []).map(function (p) {
-                            return (p.cantidad || 0) + 'x ' + (p.nombre || '');
-                        }).join(', ') || '—';
+                        var platillosArray = Array.isArray(o.platillos) ? o.platillos : [];
                         var estado = (o.estado || 'pendiente').toLowerCase().replace(/\s/g, '-');
                         var estadoClass = 'estado-pendiente';
                         if (estado === 'en-preparacion' || estado === 'preparacion') estadoClass = 'estado-preparacion';
-                        else if (estado === 'listo') estadoClass = 'estado-listo';
+                        else if (estado === 'listo' || estado === 'servido') estadoClass = 'estado-listo';
                         else if (estado === 'entregado') estadoClass = 'estado-entregado';
+                        var esPagada = (o.estado || '').toLowerCase() === 'pagada';
+                        var puedeCambiarQty = !esPagada && (estado === 'pendiente' || estado === 'en-preparacion' || estado === 'preparacion');
+                        var puedeEliminar = !esPagada && estado === 'pendiente';
+
+                        var platillosHtml = '';
+                        platillosArray.forEach(function (p, idx) {
+                            var cant = p.cantidad || 1;
+                            var precio = p.precio || 0;
+                            var subtotal = precio * cant;
+                            var nombre = p.nombre || '';
+                            platillosHtml += '<div class="orden-platillo-fila" data-index="' + idx + '">' +
+                                '<span class="orden-platillo-nombre">' + nombre + '</span>' +
+                                '<span class="orden-platillo-qty">[' + cant + 'x]</span>' +
+                                '<span class="orden-platillo-precio">$' + precio + '</span>' +
+                                '<span class="orden-platillo-precio">$' + subtotal.toFixed(2) + '</span>';
+                            if (puedeCambiarQty) {
+                                platillosHtml += '<button type="button" class="btn-qty btn-qty-mas" data-index="' + idx + '" aria-label="Aumentar">+</button>' +
+                                    '<button type="button" class="btn-qty btn-qty-menos" data-index="' + idx + '" aria-label="Disminuir">−</button>';
+                            }
+                            if (puedeEliminar) {
+                                platillosHtml += '<button type="button" class="btn-eliminar-platillo" data-index="' + idx + '" data-nombre="' + nombre.replace(/"/g, '&quot;') + '" aria-label="Eliminar">✕</button>';
+                            }
+                            platillosHtml += '</div>';
+                        });
+                        if (!platillosHtml) platillosHtml = '<div class="orden-platillo-fila"><span class="orden-platillo-nombre">—</span></div>';
+
+                        var botonesAcciones = '';
+                        if (!esPagada) {
+                            botonesAcciones += '<button type="button" class="btn-agregar-mas" title="Agregar platillo">＋ Agregar platillo</button>';
+                        }
+                        botonesAcciones += '<button type="button" class="btn-whatsapp-mesero" title="Enviar por WhatsApp">WhatsApp</button>';
+
                         var card = document.createElement('div');
                         card.className = 'order-card';
                         card.setAttribute('data-orden-id', doc.id);
                         card.innerHTML = '<div class="order-card-header">' +
                             '<span class="order-card-mesa">Mesa ' + (o.mesa || '—') + '</span>' +
                             '<span class="order-card-estado ' + estadoClass + '">' + (o.estado || 'pendiente') + '</span></div>' +
-                            '<div class="order-card-platillos">' + platillosText + '</div>' +
-                            '<div class="order-card-total">Total: $' + (o.total != null ? o.total : 0) + '</div>' +
-                            '<div class="order-card-actions">' +
-                            '<button type="button" class="btn-whatsapp-mesero" title="Enviar por WhatsApp">WhatsApp</button>' +
-                            '</div>';
+                            '<div class="order-card-platillos">' + platillosHtml + '</div>' +
+                            '<div class="order-card-total">Total: $' + (typeof o.total === 'number' ? o.total.toFixed(2) : '0.00') + '</div>' +
+                            '<div class="order-card-actions">' + botonesAcciones + '</div>';
                         myOrdersList.appendChild(card);
+
                         card.querySelector('.btn-whatsapp-mesero').addEventListener('click', function () {
                             if (typeof window.enviarWhatsApp === 'function') {
                                 window.enviarWhatsApp(card.getAttribute('data-orden-id'));
                             }
                         });
+
+                        var btnAgregarMas = card.querySelector('.btn-agregar-mas');
+                        if (btnAgregarMas) {
+                            btnAgregarMas.addEventListener('click', function () {
+                                var platillosActuales = platillosArray.slice();
+                                var mesaNum = o.mesa || '?';
+                                openModalEdicion(doc.id, mesaNum, platillosActuales);
+                            });
+                        }
+
+                        card.querySelectorAll('.btn-qty-mas').forEach(function (btn) {
+                            btn.addEventListener('click', function () {
+                                var idx = parseInt(this.getAttribute('data-index'), 10);
+                                var arr = platillosArray.slice();
+                                if (idx < 0 || idx >= arr.length) return;
+                                arr[idx] = {
+                                    nombre: arr[idx].nombre,
+                                    precio: arr[idx].precio || 0,
+                                    cantidad: (arr[idx].cantidad || 1) + 1
+                                };
+                                var total = 0;
+                                arr.forEach(function (p) { total += (p.precio || 0) * (p.cantidad || 1); });
+                                db.collection('ordenes').doc(doc.id).update({ platillos: arr, total: total }).catch(function (err) {
+                                    console.error('Error al actualizar:', err);
+                                    alert('No se pudo actualizar la orden.');
+                                });
+                            });
+                        });
+
+                        card.querySelectorAll('.btn-qty-menos').forEach(function (btn) {
+                            btn.addEventListener('click', function () {
+                                var idx = parseInt(this.getAttribute('data-index'), 10);
+                                var arr = platillosArray.slice();
+                                if (idx < 0 || idx >= arr.length) return;
+                                var cant = (arr[idx].cantidad || 1) - 1;
+                                if (cant < 1) return;
+                                arr[idx] = {
+                                    nombre: arr[idx].nombre,
+                                    precio: arr[idx].precio || 0,
+                                    cantidad: cant
+                                };
+                                var total = 0;
+                                arr.forEach(function (p) { total += (p.precio || 0) * (p.cantidad || 1); });
+                                db.collection('ordenes').doc(doc.id).update({ platillos: arr, total: total }).catch(function (err) {
+                                    console.error('Error al actualizar:', err);
+                                    alert('No se pudo actualizar la orden.');
+                                });
+                            });
+                        });
+
+                        card.querySelectorAll('.btn-eliminar-platillo').forEach(function (btn) {
+                            btn.addEventListener('click', function () {
+                                var idx = parseInt(this.getAttribute('data-index'), 10);
+                                var nombre = this.getAttribute('data-nombre') || 'este platillo';
+                                if (!confirm('¿Eliminar ' + nombre + ' de la orden?')) return;
+                                var arr = platillosArray.slice();
+                                if (idx < 0 || idx >= arr.length) return;
+                                arr.splice(idx, 1);
+                                var total = 0;
+                                arr.forEach(function (p) { total += (p.precio || 0) * (p.cantidad || 1); });
+                                db.collection('ordenes').doc(doc.id).update({ platillos: arr, total: total }).catch(function (err) {
+                                    console.error('Error al actualizar:', err);
+                                    alert('No se pudo actualizar la orden.');
+                                });
+                            });
+                        });
+                    });
+                }
+
+                if (filtroFechaInput) {
+                    filtroFechaInput.addEventListener('change', filtrarYRenderOrdenes);
+                }
+
+                db.collection('ordenes').where('meseroId', '==', user.uid).onSnapshot(function (snapshot) {
+                    todasOrdenesmesero = snapshot;
+                    filtrarYRenderOrdenes();
+
+                    // Actualizar estado visual de botones de mesa (orden activa = ocupada)
+                    var docs = snapshot.docs || [];
+                    for (var k in tableButtons) {
+                        tableButtons[k].classList.remove('mesa-ocupada', 'mesa-libre');
+                    }
+                    docs.forEach(function (doc) {
+                        var o = doc.data();
+                        var estado = (o.estado || '').toLowerCase();
+                        if (estado !== 'pagada' && estado !== 'cancelada') {
+                            var mesa = o.mesa;
+                            if (tableButtons[mesa]) {
+                                tableButtons[mesa].classList.add('mesa-ocupada');
+                            }
+                        }
                     });
                 });
             });
@@ -827,30 +1106,76 @@
                 });
             });
 
-            // Crear grid de 50 mesas
-            for (var i = 1; i <= 50; i++) {
-                var btn = document.createElement('button');
-                btn.className = 'table-btn';
-                btn.textContent = 'Mesa ' + i;
-                btn.setAttribute('data-table', i);
-                btn.addEventListener('click', function () {
-                    openModal(parseInt(this.getAttribute('data-table'), 10));
+            // Cargar mesas desde configuración en Firestore en tiempo real (onSnapshot)
+            function cargarMesas() {
+                db.collection('configuracion').doc('mesas').onSnapshot(function (doc) {
+                    tablesGrid.innerHTML = '';
+                    for (var k in tableButtons) delete tableButtons[k];
+                    var numeros = [];
+                    if (doc.exists && doc.data().numeros && Array.isArray(doc.data().numeros) && doc.data().numeros.length > 0) {
+                        numeros = doc.data().numeros;
+                    } else {
+                        for (var i = 1; i <= 50; i++) numeros.push(i);
+                    }
+                    numeros.forEach(function (numero) {
+                        var btn = document.createElement('button');
+                        btn.className = 'table-btn';
+                        btn.textContent = 'Mesa ' + numero;
+                        btn.setAttribute('data-table', numero);
+                        btn.addEventListener('click', function () {
+                            openModal(parseInt(this.getAttribute('data-table'), 10));
+                        });
+                        tablesGrid.appendChild(btn);
+                        tableButtons[numero] = btn;
+                    });
+                }, function (err) {
+                    console.error('Error cargando configuración de mesas:', err);
+                    tablesGrid.innerHTML = '';
+                    for (var k in tableButtons) delete tableButtons[k];
+                    var numeros = [];
+                    for (var d = 1; d <= 50; d++) numeros.push(d);
+                    numeros.forEach(function (numero) {
+                        var btn = document.createElement('button');
+                        btn.className = 'table-btn';
+                        btn.textContent = 'Mesa ' + numero;
+                        btn.setAttribute('data-table', numero);
+                        btn.addEventListener('click', function () {
+                            openModal(parseInt(this.getAttribute('data-table'), 10));
+                        });
+                        tablesGrid.appendChild(btn);
+                        tableButtons[numero] = btn;
+                    });
                 });
-                tablesGrid.appendChild(btn);
-                tableButtons[i] = btn;
             }
+            cargarMesas();
 
-            // Renderizar menú (desde menuItems cargados por onSnapshot)
+            // Renderizar menú (desde menuItems cargados por onSnapshot), agrupado por categoría
             function renderMenu() {
-                menuList.innerHTML = '';
+                var ordenCategorias = ['Entradas', 'Platos fuertes', 'Bebidas', 'Postres', 'Otros'];
+                var byCat = {};
                 menuItems.forEach(function (item) {
-                    var div = document.createElement('div');
-                    div.className = 'menu-item';
-                    div.innerHTML = '<div class="menu-item-info">' +
-                        '<span class="menu-item-name">' + item.name + '</span><br>' +
-                        '<span class="menu-item-price">$' + item.price + '</span></div>' +
-                        '<button type="button" class="btn-add" data-id="' + item.id + '" data-name="' + item.name + '" data-price="' + item.price + '">+</button>';
-                    menuList.appendChild(div);
+                    var c = item.categoria || 'Otros';
+                    if (!byCat[c]) byCat[c] = [];
+                    byCat[c].push(item);
+                });
+                menuList.innerHTML = '';
+                ordenCategorias.forEach(function (cat) {
+                    if (!byCat[cat] || byCat[cat].length === 0) return;
+                    var section = document.createElement('div');
+                    section.className = 'menu-section';
+                    var h3 = document.createElement('h3');
+                    h3.textContent = cat;
+                    section.appendChild(h3);
+                    byCat[cat].forEach(function (item) {
+                        var div = document.createElement('div');
+                        div.className = 'menu-item';
+                        div.innerHTML = '<div class="menu-item-info">' +
+                            '<span class="menu-item-name">' + item.name + '</span><br>' +
+                            '<span class="menu-item-price">$' + item.price + '</span></div>' +
+                            '<button type="button" class="btn-add" data-id="' + item.id + '" data-name="' + item.name + '" data-price="' + item.price + '">+</button>';
+                        section.appendChild(div);
+                    });
+                    menuList.appendChild(section);
                 });
                 menuList.querySelectorAll('.btn-add').forEach(function (btn) {
                     btn.addEventListener('click', function () {
@@ -901,6 +1226,18 @@
                 }
             }
 
+            function openModalEdicion(ordenId, mesaNum, platillosActuales) {
+                editandoOrdenId = ordenId;
+                editandoPlatillosOriginales = platillosActuales || [];
+                selectedTable = mesaNum;
+                order = {};
+                modalTitle.textContent = 'Agregar a Mesa ' + mesaNum;
+                btnSend.textContent = 'Agregar platillos';
+                renderMenu();
+                updateOrderSummary();
+                modalOverlay.classList.add('open');
+            }
+
             function closeModal() {
                 modalOverlay.classList.remove('open');
                 if (selectedTable && tableButtons[selectedTable]) {
@@ -908,6 +1245,10 @@
                 }
                 selectedTable = null;
                 order = {};
+                editandoOrdenId = null;
+                editandoPlatillosOriginales = [];
+                btnSend.textContent = 'Enviar Orden';
+                btnSend.disabled = true;
             }
 
             function showToast() {
@@ -919,34 +1260,86 @@
 
             // 3. Enviar orden a db.collection('ordenes')
             function sendOrder() {
-                if (!selectedTable || Object.keys(order).length === 0) return;
+                if (Object.keys(order).length === 0) return;
                 var user = auth.currentUser;
                 if (!user) return;
-                var total = 0;
-                var platillos = [];
+
+                // Construir array de platillos nuevos seleccionados
+                var platillosNuevos = [];
+                var totalNuevo = 0;
                 for (var id in order) {
                     if (order[id].qty > 0) {
-                        var subtotal = order[id].price * order[id].qty;
-                        total += subtotal;
-                        platillos.push({
+                        platillosNuevos.push({
                             nombre: order[id].name,
                             precio: order[id].price,
                             cantidad: order[id].qty
                         });
+                        totalNuevo += order[id].price * order[id].qty;
                     }
                 }
+
+                // MODO EDICIÓN: fusionar con platillos existentes y hacer update
+                if (editandoOrdenId) {
+                    var fusionados = editandoPlatillosOriginales.slice();
+                    platillosNuevos.forEach(function(nuevo) {
+                        var encontrado = false;
+                        for (var i = 0; i < fusionados.length; i++) {
+                            if (fusionados[i].nombre === nuevo.nombre) {
+                                fusionados[i] = {
+                                    nombre: fusionados[i].nombre,
+                                    precio: fusionados[i].precio,
+                                    cantidad: (fusionados[i].cantidad || 1) + nuevo.cantidad
+                                };
+                                encontrado = true;
+                                break;
+                            }
+                        }
+                        if (!encontrado) {
+                            fusionados.push(nuevo);
+                        }
+                    });
+
+                    // Recalcular total completo
+                    var totalFinal = 0;
+                    fusionados.forEach(function(p) {
+                        totalFinal += (p.precio || 0) * (p.cantidad || 1);
+                    });
+
+                    db.collection('ordenes').doc(editandoOrdenId).update({
+                        platillos: fusionados,
+                        total: totalFinal
+                    }).then(function() {
+                        var toastEl = document.getElementById('toast');
+                        toastEl.textContent = 'Platillos agregados correctamente';
+                        toastEl.classList.add('show');
+                        setTimeout(function() {
+                            toastEl.classList.remove('show');
+                            toastEl.textContent = 'Orden enviada correctamente';
+                        }, 2500);
+                        closeModal();
+                    }).catch(function(err) {
+                        console.error('Error al actualizar orden:', err);
+                        alert('No se pudo actualizar la orden.');
+                    });
+                    return;
+                }
+
+                // MODO NUEVA ORDEN: flujo original
+                if (!selectedTable) return;
                 db.collection('ordenes').add({
                     mesa: String(selectedTable),
-                    platillos: platillos,
-                    total: total,
+                    platillos: platillosNuevos,
+                    total: totalNuevo,
                     estado: 'pendiente',
                     meseroId: user.uid,
                     meseroNombre: meseroNombre || user.displayName || user.email || 'Mesero',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(function () {
-                    showToast();
+                }).then(function() {
+                    var toastEl = document.getElementById('toast');
+                    toastEl.classList.add('show');
+                    setTimeout(function() { toastEl.classList.remove('show'); }, 2500);
                     closeModal();
-                }).catch(function (err) {
+                }).catch(function(err) {
                     console.error('Error al guardar orden:', err);
                 });
             }

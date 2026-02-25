@@ -150,7 +150,7 @@
         .content {
             flex: 1;
             padding: 1.5rem;
-            overflow-auto;
+            overflow: auto;
         }
 
         .section {
@@ -316,6 +316,23 @@
             border-color: var(--color-primary);
         }
 
+        .cotizacion-detalles-textarea {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 12px;
+            background: #2C2C2C;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: var(--color-text);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .cotizacion-detalles-textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
         .section-toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -362,6 +379,85 @@
             border: 1px solid #444;
             border-radius: 4px;
             color: var(--color-text);
+        }
+
+        /* Mantenimiento */
+        .mant-block {
+            background: var(--color-card);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .mant-block .report-filters input,
+        .mant-block input[type="date"] {
+            padding: 10px 12px;
+            background: #2C2C2C;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: var(--color-text);
+        }
+        .mant-block .mant-count {
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        /* Zona de peligro — Reset total */
+        .zona-peligro {
+            border: 2px solid var(--color-error);
+            background: rgba(207, 102, 121, 0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        .zona-peligro-titulo {
+            font-family: var(--font-heading);
+            color: var(--color-error);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        .zona-peligro-desc {
+            color: var(--color-text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        #resetPassword.zona-peligro-input,
+        .zona-peligro .zona-peligro-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 12px;
+            background: #2C2C2C;
+            border: 1px solid var(--color-error);
+            border-radius: 4px;
+            color: var(--color-text);
+            font-size: 1rem;
+        }
+        #resetPassword:focus,
+        .zona-peligro-input:focus {
+            outline: none;
+            border-color: var(--color-error);
+        }
+        #btnResetTotal.zona-peligro-btn,
+        .zona-peligro-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--color-error);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+        #btnResetTotal:hover:not(:disabled),
+        .zona-peligro-btn:hover:not(:disabled) {
+            filter: brightness(0.9);
+        }
+        #btnResetNuclear:hover:not(:disabled) {
+            opacity: 0.85;
         }
 
         .msg-empty {
@@ -416,6 +512,13 @@
                 position: relative;
                 -webkit-mask-image: linear-gradient(to right, black 0%, black calc(100% - 32px), transparent 100%);
                 mask-image: linear-gradient(to right, black 0%, black calc(100% - 32px), transparent 100%);
+            }
+            .nav-group-title {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.65rem;
+            }
+            .nav-group-items.collapsed {
+                display: none;
             }
             .header {
                 display: flex;
@@ -761,7 +864,252 @@
             @page { size: 80mm auto; margin: 0; }
             body { background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
+        /* Imprimir solo Reporte Semanal */
+        @media print {
+            body.print-reporte-semanal .app-layout > .sidebar { display: none !important; }
+            body.print-reporte-semanal .app-layout .header { display: none !important; }
+            body.print-reporte-semanal .content .section:not(#section-reporte-semanal) { display: none !important; }
+            body.print-reporte-semanal #section-reporte-semanal { display: block !important; visibility: visible !important; }
+            body.print-reporte-semanal #reporteSemanalContenido { display: block !important; }
+        }
+
+        /* Resumen por período y gráfica */
+        .dashboard-subtitle {
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            font-size: 1.15rem;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+        .period-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .period-row {
+            font-size: 0.9rem;
+            color: var(--color-text);
+            margin-bottom: 0.35rem;
+        }
+        .period-row span {
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+        .chart-container {
+            background: var(--color-card);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            position: relative;
+            height: 300px;
+        }
+        #graficaSemana {
+            width: 100%;
+            max-height: 300px;
+        }
+
+        /* Sección Pedidos */
+        .pedidos-title {
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .pedidos-form .form-group {
+            margin-bottom: 1rem;
+        }
+        .pedidos-form .form-group label {
+            display: block;
+            margin-bottom: 0.35rem;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+        .pedidos-form .form-group select {
+            padding: 8px 10px;
+            background: #2C2C2C;
+            border: 1px solid #444;
+            color: var(--color-text);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .pedidos-table-wrap {
+            margin: 1rem 0;
+        }
+        .pedidos-table th,
+        .pedidos-table td {
+            padding: 8px;
+            border-bottom: 1px solid #333;
+        }
+        .pedidos-table input.pedido-input {
+            padding: 6px;
+            background: #2C2C2C;
+            border: 1px solid #444;
+            color: var(--color-text);
+            border-radius: 4px;
+            width: 100%;
+            min-width: 0;
+            font-size: 0.9rem;
+        }
+        .pedidos-table input.pedido-input[type="number"] {
+            width: 80px;
+        }
+        .pedidos-table .input-tabla,
+        .pedidos-table input.input-tabla,
+        .pedidos-table select.input-tabla {
+            padding: 6px;
+            background: #2C2C2C;
+            border: 1px solid #444;
+            color: var(--color-text);
+            border-radius: 4px;
+            width: 100%;
+            min-width: 0;
+            font-size: 0.9rem;
+        }
+        .pedidos-table input.input-tabla[type="number"] {
+            width: 80px;
+        }
+        .pedido-total-wrap {
+            margin: 1rem 0;
+            font-size: 1.1rem;
+        }
+        .pedido-total-value {
+            color: var(--color-primary);
+            font-weight: 700;
+            font-family: var(--font-heading);
+        }
+        .btn-eliminar-fila {
+            padding: 6px 10px;
+            background: var(--color-error);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .btn-eliminar-fila:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .period-cards {
+                grid-template-columns: 1fr;
+            }
+            #section-pedidos .pedidos-table input.pedido-input {
+                width: 100%;
+                min-height: 44px;
+            }
+            #section-pedidos .pedidos-table input.pedido-input[type="number"] {
+                width: 100%;
+            }
+            #section-pedidos .pedidos-table .input-tabla,
+            #section-pedidos .pedidos-table input.input-tabla,
+            #section-pedidos .pedidos-table select.input-tabla {
+                width: 100%;
+                min-height: 44px;
+            }
+            #section-pedidos .pedidos-table input.input-tabla[type="number"] {
+                width: 100%;
+            }
+        }
+
+        /* Reporte Semanal */
+        .reporte-semanal-periodo {
+            color: var(--color-text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        .reporte-semanal-card {
+            background: var(--color-card);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .reporte-semanal-card-title {
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .reporte-semanal-card p {
+            margin-bottom: 0.5rem;
+        }
+        .reporte-semanal-valor {
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            font-size: 1.5rem;
+        }
+        .reporte-semanal-lista {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0 0;
+        }
+        .reporte-semanal-lista li {
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #333;
+        }
+        .reporte-semanal-lista li:last-child {
+            border-bottom: none;
+        }
+
+        .mesa-badge-preview {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid var(--color-primary);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--color-primary);
+            margin: 3px;
+        }
+
+        .nav-group {
+            margin-bottom: 0.25rem;
+        }
+        .nav-group-title {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-top: 1px solid #2a2a2a;
+            color: var(--color-text-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 0.6rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .nav-group-title:hover {
+            color: var(--color-primary);
+        }
+        .nav-group-title .nav-arrow {
+            font-size: 0.6rem;
+            transition: transform 0.2s;
+        }
+        .nav-group-title.collapsed .nav-arrow {
+            transform: rotate(-90deg);
+        }
+        .nav-group-items {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            max-height: 500px;
+        }
+        .nav-group-items.collapsed {
+            max-height: 0;
+        }
+        .nav-group-items ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -771,10 +1119,42 @@
             <ul class="nav-list">
                 <li><a href="#" data-section="dashboard" class="active">Dashboard</a></li>
                 <li><a href="#" data-section="ordenes">Órdenes en vivo</a></li>
-                <li><a href="#" data-section="menu">Menú</a></li>
-                <li><a href="#" data-section="meseros">Meseros</a></li>
-                <li><a href="#" data-section="gastos">Gastos</a></li>
-                <li><a href="#" data-section="reportes">Reportes</a></li>
+                <li><a href="#" data-section="pedidos">Pedidos</a></li>
+                <li>
+                    <div class="nav-group">
+                        <button type="button" class="nav-group-title">Finanzas <span class="nav-arrow">▼</span></button>
+                        <div class="nav-group-items">
+                            <ul>
+                                <li><a href="#" data-section="reportes">Reportes</a></li>
+                                <li><a href="#" data-section="reporte-semanal">Reporte Semanal</a></li>
+                                <li><a href="#" data-section="gastos">Gastos</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="nav-group">
+                        <button type="button" class="nav-group-title">Gestión <span class="nav-arrow">▼</span></button>
+                        <div class="nav-group-items">
+                            <ul>
+                                <li><a href="#" data-section="cotizaciones">Cotizaciones</a></li>
+                                <li><a href="#" data-section="menu">Menú</a></li>
+                                <li><a href="#" data-section="meseros">Meseros</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="nav-group">
+                        <button type="button" class="nav-group-title">Sistema <span class="nav-arrow">▼</span></button>
+                        <div class="nav-group-items">
+                            <ul>
+                                <li><a href="#" data-section="configuracion">Configuración</a></li>
+                                <li><a href="#" data-section="mantenimiento">Mantenimiento</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
             </ul>
         </aside>
 
@@ -783,6 +1163,10 @@
                 <h2 id="headerTitle">Dashboard</h2>
                 <div class="header-actions">
                     <span class="admin-name" id="adminName">Admin</span>
+                    <div id="notifBadge" style="display:none; position:relative;">
+                        <span id="notifIcon" style="font-size:1.2rem;cursor:pointer;" title="Nuevas órdenes">🔔</span>
+                        <span id="notifCount" style="position:absolute;top:-6px;right:-6px;background:var(--color-error);color:white;border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;">0</span>
+                    </div>
                     <button type="button" class="btn-logout" id="btnLogout">Cerrar sesión</button>
                 </div>
             </header>
@@ -807,6 +1191,51 @@
                             <div class="card-title">Órdenes activas</div>
                             <div class="card-value" id="ordenesActivas">0</div>
                         </div>
+                    </div>
+                    <h3 class="dashboard-subtitle">Resumen por período</h3>
+                    <div class="period-cards">
+                        <div class="card">
+                            <div class="card-title">Esta Semana</div>
+                            <div class="period-row">Ingresos: <span id="resumenSemanaIngresos">$0.00</span></div>
+                            <div class="period-row">Gastos: <span id="resumenSemanaGastos">$0.00</span></div>
+                            <div class="period-row">Saldo: <span id="resumenSemanaSaldo">$0.00</span></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Este Mes</div>
+                            <div class="period-row">Ingresos: <span id="resumenMesIngresos">$0.00</span></div>
+                            <div class="period-row">Gastos: <span id="resumenMesGastos">$0.00</span></div>
+                            <div class="period-row">Saldo: <span id="resumenMesSaldo">$0.00</span></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Total General</div>
+                            <div class="period-row">Ingresos: <span id="resumenTotalIngresos">$0.00</span></div>
+                            <div class="period-row">Gastos: <span id="resumenTotalGastos">$0.00</span></div>
+                            <div class="period-row">Saldo: <span id="resumenTotalSaldo">$0.00</span></div>
+                        </div>
+                    </div>
+                    <h3 class="dashboard-subtitle">Últimos 7 días</h3>
+                    <div class="chart-container">
+                        <canvas id="graficaSemana" height="300"></canvas>
+                    </div>
+
+                    <div style="height: 120px;"></div>
+                    <div class="zona-peligro">
+                        <h3 class="zona-peligro-titulo">Reset Operativo</h3>
+                        <p class="zona-peligro-desc">Elimina permanentemente: órdenes, cotizaciones, gastos, platillos del menú y cuentas de meseros. ✅ Los registros de ventas SE CONSERVAN — tu historial financiero permanece intacto. Útil para limpiar datos operativos entre temporadas.</p>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <input type="password" id="resetPassword" placeholder="Ingresa tu contraseña de admin" class="zona-peligro-input" autocomplete="current-password">
+                        </div>
+                        <button type="button" id="btnResetTotal" class="zona-peligro-btn">RESET OPERATIVO — CONSERVA VENTAS</button>
+                    </div>
+
+                    <div style="height: 60px;"></div>
+                    <div style="border: 2px solid #8B0000; background: rgba(139,0,0,0.08); border-radius: 8px; padding: 1.5rem;">
+                        <h3 style="font-family: var(--font-heading); color: #FF4444; font-size: 1.1rem; margin-bottom: 0.75rem;">☢️ Reset Nuclear — Borrado Total</h3>
+                        <p style="color: #FF4444; font-size: 0.85rem; margin-bottom: 1rem;">PELIGRO MÁXIMO: Esta acción elimina absolutamente TODOS los datos del sistema sin excepción: órdenes, cotizaciones, gastos, menú, meseros Y registros de ventas. ❌ No hay forma de recuperar nada. Usar únicamente para reinstalación completa del sistema.</p>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <input type="password" id="resetNuclearPassword" placeholder="Contraseña de administrador" autocomplete="current-password" style="width: 100%; max-width: 400px; padding: 10px 12px; border: 2px solid #8B0000; border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
+                        </div>
+                        <button type="button" id="btnResetNuclear" style="width: 100%; padding: 14px; background: #8B0000; color: white; font-weight: 700; text-transform: uppercase; border-radius: 4px; border: none; cursor: pointer; transition: opacity 0.2s;">☢️ BORRAR TODO — SIN EXCEPCIÓN</button>
                     </div>
                 </section>
 
@@ -839,6 +1268,100 @@
                     </div>
                 </section>
 
+                <!-- Pedidos -->
+                <section id="section-pedidos" class="section">
+                    <h3 class="pedidos-title">Registrar Pedido</h3>
+                    <div class="pedidos-form">
+                        <div class="form-group">
+                            <label for="pedidoMesa">Mesa</label>
+                            <select id="pedidoMesa">
+                                <option value="">Seleccione mesa</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pedidoMesero">Mesero</label>
+                            <select id="pedidoMesero">
+                                <option value="">Seleccione mesero</option>
+                            </select>
+                        </div>
+                        <div class="table-wrap pedidos-table-wrap">
+                            <table class="pedidos-table">
+                                <thead>
+                                    <tr>
+                                        <th>Platillo</th>
+                                        <th>Precio</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pedidoFilas"></tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn" id="btnAgregarFila">+ Agregar platillo</button>
+                        <div class="pedido-total-wrap">
+                            <strong>Total:</strong> <span id="pedidoTotal" class="pedido-total-value">$0.00</span>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="btnGuardarPedido">Guardar Pedido</button>
+                    </div>
+                </section>
+
+                <!-- Cotizaciones -->
+                <section id="section-cotizaciones" class="section">
+                    <div class="section-toolbar">
+                        <h3>Cotizaciones</h3>
+                        <button type="button" class="btn" id="btnNuevaCotizacion">Nueva Cotización</button>
+                    </div>
+                    <div id="formCotizacion" style="display:none;" class="pedidos-form">
+                        <div class="form-group">
+                            <label for="cotizacionTitulo">Título / Nombre</label>
+                            <input type="text" id="cotizacionTitulo" placeholder="Ej: Evento familiar 15 personas">
+                        </div>
+                        <div class="form-group">
+                            <label for="cotizacionDetalles">Detalles del evento</label>
+                            <textarea id="cotizacionDetalles" rows="3" placeholder="Ej: 15 personas, jardín exterior, servicio completo, observaciones especiales..." class="cotizacion-detalles-textarea"></textarea>
+                        </div>
+                        <div class="table-wrap pedidos-table-wrap">
+                            <table class="pedidos-table">
+                                <thead>
+                                    <tr>
+                                        <th>Descripción</th>
+                                        <th>Precio</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cotizacionFilas"></tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn" id="btnAgregarFilaCot">+ Agregar platillo</button>
+                        <div class="pedido-total-wrap">
+                            <strong>Total:</strong> <span id="cotizacionTotal" class="pedido-total-value">$0.00</span>
+                        </div>
+                        <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                            <button type="button" class="btn btn-primary" id="btnGuardarCotizacion">Guardar Cotización</button>
+                            <button type="button" class="btn btn-secondary" id="btnCancelarCotizacion">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap" style="margin-top:1.5rem;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Detalles</th>
+                                    <th>Total</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cotizacionesBody">
+                                <tr><td colspan="5" class="msg-empty">Cargando cotizaciones…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
                 <!-- Menú -->
                 <section id="section-menu" class="section">
                     <div class="section-toolbar">
@@ -854,6 +1377,16 @@
                             <label>Precio ($)</label>
                             <input type="number" id="platilloPrecio" placeholder="0.00" step="0.01" min="0">
                         </div>
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="platilloCategoria">
+                                <option value="Entradas">Entradas</option>
+                                <option value="Platos fuertes">Platos fuertes</option>
+                                <option value="Bebidas">Bebidas</option>
+                                <option value="Postres">Postres</option>
+                                <option value="Otros" selected>Otros</option>
+                            </select>
+                        </div>
                         <button type="button" class="btn" id="btnGuardarPlatillo">Guardar</button>
                         <button type="button" class="btn btn-secondary" id="btnCancelarPlatillo">Cancelar</button>
                     </div>
@@ -863,11 +1396,12 @@
                                 <tr>
                                     <th>Nombre</th>
                                     <th>Precio</th>
+                                    <th>Categoría</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="menuBody">
-                                <tr><td colspan="3" class="msg-empty">Cargando menú…</td></tr>
+                                <tr><td colspan="4" class="msg-empty">Cargando menú…</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1031,11 +1565,170 @@
                         </table>
                     </div>
                 </section>
+
+                <!-- Reporte Semanal -->
+                <section id="section-reporte-semanal" class="section">
+                    <h3 style="font-family:var(--font-heading);color:var(--color-primary);margin-bottom:0.35rem;">Reporte Semanal</h3>
+                    <p id="reporteSemanalPeriodo" class="reporte-semanal-periodo">—</p>
+                    <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+                        <button type="button" class="btn" id="btnGenerarReporteSemanal">Generar Reporte</button>
+                        <button type="button" class="btn btn-secondary" id="btnImprimirReporteSemanal">Imprimir Reporte</button>
+                    </div>
+                    <div id="reporteSemanalContenido" style="display:none;">
+                        <div class="reporte-semanal-card">
+                            <h4 class="reporte-semanal-card-title">Resumen general de la semana</h4>
+                            <p>Total ingresos: <span id="rsTotalIngresos" class="reporte-semanal-valor">$0.00</span></p>
+                            <p>Total gastos: <span id="rsTotalGastos" class="reporte-semanal-valor">$0.00</span></p>
+                            <p>Ganancia neta: <span id="rsGananciaNeta" class="reporte-semanal-valor">$0.00</span></p>
+                            <p>Promedio de ventas por día: <span id="rsPromedioDia" class="reporte-semanal-valor">$0.00</span></p>
+                            <p>Día con más ventas: <span id="rsDiaPico" class="reporte-semanal-valor">—</span></p>
+                            <p>Hora pico: <span id="rsHoraPico" class="reporte-semanal-valor">—</span></p>
+                        </div>
+                        <div class="reporte-semanal-card">
+                            <h4 class="reporte-semanal-card-title">Platillo estrella</h4>
+                            <p>Platillo más vendido: <span id="rsPlatilloEstrella" class="reporte-semanal-valor">—</span></p>
+                            <p>Veces vendido: <span id="rsPlatilloVeces" class="reporte-semanal-valor">0</span></p>
+                            <ul id="rsTop5Platillos" class="reporte-semanal-lista"></ul>
+                        </div>
+                        <div class="reporte-semanal-card">
+                            <h4 class="reporte-semanal-card-title">Mesero top</h4>
+                            <p>Mesero con más ventas: <span id="rsMeseroTop" class="reporte-semanal-valor">—</span></p>
+                            <p>Total vendido: <span id="rsMeseroTotal" class="reporte-semanal-valor">$0.00</span></p>
+                            <ul id="rsListaMeseros" class="reporte-semanal-lista"></ul>
+                        </div>
+                        <div class="reporte-semanal-card">
+                            <h4 class="reporte-semanal-card-title">Ventas por día de la semana</h4>
+                            <ul id="rsVentasPorDia" class="reporte-semanal-lista"></ul>
+                        </div>
+                        <div class="reporte-semanal-card">
+                            <h4 class="reporte-semanal-card-title">Análisis de órdenes</h4>
+                            <p>Total de órdenes: <span id="rsTotalOrdenes" class="reporte-semanal-valor">0</span></p>
+                            <p>Ticket promedio por orden: <span id="rsTicketPromedio" class="reporte-semanal-valor">$0.00</span></p>
+                            <p>Mesa más activa: <span id="rsMesaMasActiva" class="reporte-semanal-valor">—</span></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Mantenimiento -->
+                <section id="section-mantenimiento" class="section">
+                    <h2 style="font-family: var(--font-heading); color: var(--color-primary); margin-bottom: 1rem;">Mantenimiento de Base de Datos</h2>
+                    <p style="color: var(--color-error); margin-bottom: 1.5rem;">Las eliminaciones son permanentes e irreversibles. La colección de Ventas nunca se modifica.</p>
+
+                    <div class="mant-block">
+                        <h3 style="font-family: var(--font-heading); color: var(--color-primary); margin-bottom: 0.5rem;">Limpiar Órdenes</h3>
+                        <p class="color-text-muted" style="color: var(--color-text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Órdenes en vivo y pedidos por período. No afecta ventas cerradas.</p>
+                        <div class="report-filters" style="margin-bottom: 0.75rem;">
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <label for="mantOrdenesDesde">Desde</label>
+                                <input type="date" id="mantOrdenesDesde">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <label for="mantOrdenesHasta">Hasta</label>
+                                <input type="date" id="mantOrdenesHasta">
+                            </div>
+                        </div>
+                        <p style="margin-bottom: 0.5rem;"><span id="mantOrdenesCount" class="mant-count"></span></p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <button type="button" class="btn btn-secondary" id="btnBuscarOrdenes">Buscar registros</button>
+                            <button type="button" class="btn btn-danger" id="btnEliminarOrdenes">Eliminar registros</button>
+                        </div>
+                    </div>
+
+                    <div class="mant-block">
+                        <h3 style="font-family: var(--font-heading); color: var(--color-primary); margin-bottom: 0.5rem;">Limpiar Cotizaciones</h3>
+                        <p class="color-text-muted" style="color: var(--color-text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Cotizaciones y presupuestos guardados en el período seleccionado.</p>
+                        <div class="report-filters" style="margin-bottom: 0.75rem;">
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <label for="mantCotizDesde">Desde</label>
+                                <input type="date" id="mantCotizDesde">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <label for="mantCotizHasta">Hasta</label>
+                                <input type="date" id="mantCotizHasta">
+                            </div>
+                        </div>
+                        <p style="margin-bottom: 0.5rem;"><span id="mantCotizCount" class="mant-count"></span></p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <button type="button" class="btn btn-secondary" id="btnBuscarCotiz">Buscar registros</button>
+                            <button type="button" class="btn btn-danger" id="btnEliminarCotiz">Eliminar registros</button>
+                        </div>
+                    </div>
+
+                    <div class="mant-block">
+                        <h3 style="font-family: var(--font-heading); color: var(--color-primary); margin-bottom: 0.5rem;">Limpiar Gastos</h3>
+                        <p class="color-text-muted" style="color: var(--color-text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Registros de gastos (compras, servicios, etc.) en el período seleccionado.</p>
+                        <div class="report-filters" style="margin-bottom: 0.75rem;">
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <label for="mantGastosDesde">Desde</label>
+                                <input type="date" id="mantGastosDesde">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <label for="mantGastosHasta">Hasta</label>
+                                <input type="date" id="mantGastosHasta">
+                            </div>
+                        </div>
+                        <p style="margin-bottom: 0.5rem;"><span id="mantGastosCount" class="mant-count"></span></p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <button type="button" class="btn btn-secondary" id="btnBuscarGastos">Buscar registros</button>
+                            <button type="button" class="btn btn-danger" id="btnEliminarGastos">Eliminar registros</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Configuración -->
+                <section id="section-configuracion" class="section">
+                    <h2 style="font-family: var(--font-heading); color: var(--color-primary); margin-bottom: 1rem;">Configuración del Restaurante</h2>
+                    <div style="background: var(--color-card); border: 1px solid #333; border-radius: 8px; padding: 1.25rem; max-width: 600px;">
+                        <h3 style="font-family: var(--font-heading); color: var(--color-primary); margin-bottom: 1rem; font-size: 1rem;">Mesas disponibles</h3>
+
+                        <div class="form-group">
+                            <label>Definir por intervalo</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+                                <input type="number" id="mesasDesde" placeholder="Desde (ej: 1)" min="1" style="width: 100px;">
+                                <input type="number" id="mesasHasta" placeholder="Hasta (ej: 30)" min="1" style="width: 100px;">
+                                <button type="button" class="btn" id="btnAplicarIntervalo">Aplicar intervalo</button>
+                            </div>
+                        </div>
+
+                        <p style="text-align: center; color: var(--color-text-muted); margin: 1rem 0; font-size: 0.9rem;">— o —</p>
+
+                        <div class="form-group">
+                            <label>Definir manualmente</label>
+                            <input type="text" id="mesasManual" placeholder="Ej: 1, 5, 10, 15, 25" style="width: 100%; max-width: 400px; margin-bottom: 0.25rem;">
+                            <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Escribe los números de mesa separados por comas</p>
+                            <button type="button" class="btn" id="btnAplicarManual">Aplicar lista manual</button>
+                        </div>
+
+                        <h4 style="font-family: var(--font-heading); color: var(--color-text); margin: 1.25rem 0 0.5rem; font-size: 0.95rem;">Vista previa de mesas configuradas</h4>
+                        <div id="mesasPreview" style="min-height: 40px; margin-bottom: 1rem;"></div>
+                        <button type="button" class="btn" id="btnGuardarMesas" disabled>Guardar configuración</button>
+
+                        <p id="mesasConfigActual" style="color: var(--color-text-muted); font-size: 0.9rem; margin-top: 1.25rem;"></p>
+                    </div>
+                </section>
             </main>
         </div>
     </div>
 
     <div id="ticket-container" style="display:none;"></div>
+
+    <div id="modalMetodoPago" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:400; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:var(--color-card); border-radius:8px; padding:1.5rem; width:100%; max-width:360px; border:1px solid #333;">
+            <h3 style="font-family:var(--font-heading); color:var(--color-primary);margin-bottom:1rem;">Método de pago</h3>
+            <p style="color:var(--color-text-muted); font-size:0.85rem;margin-bottom:1rem;">Selecciona cómo pagó el cliente</p>
+            <div style="display:flex;flex-direction:column; gap:0.75rem;margin-bottom:1.5rem;">
+                <button type="button" class="btn-metodo-pago btn" data-metodo="efectivo">💵 Efectivo</button>
+                <button type="button" class="btn-metodo-pago btn btn-secondary" data-metodo="tarjeta">💳 Tarjeta</button>
+                <button type="button" class="btn-metodo-pago btn btn-secondary" data-metodo="transferencia">📱 Transferencia</button>
+            </div>
+            <button type="button" id="btnCancelarMetodoPago" class="btn btn-secondary" style="width:100%;">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="adminToast" style="position:fixed;top:5rem;right:1.5rem;background:var(--color-card);border:1px solid var(--color-primary);border-radius:8px;padding:0.75rem 1rem;z-index:500;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:280px;">
+        <span style="color:var(--color-primary);font-weight:700;">🛎 Nueva orden</span>
+        <span id="adminToastMsg" style="color:var(--color-text-muted);font-size:0.85rem;display:block;margin-top:2px;"></span>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
