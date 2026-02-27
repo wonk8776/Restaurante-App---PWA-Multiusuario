@@ -1,0 +1,146 @@
+/* ═══════════════════════════════════════════
+   estilos.css — Overrides visuales globales
+   Familia González PWA
+   ═══════════════════════════════════════════ */
+
+/* ── Tipografía global ── */
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+}
+
+/* ── Títulos de sección con DM Serif Display ── */
+h1, h2, h3,
+.section-title,
+.page-title,
+.modal-title {
+    font-family: 'DM Serif Display', serif;
+    letter-spacing: -0.02em;
+}
+
+/* ── Header superior: título de página ── */
+.header h2,
+header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: #1A2B4A;
+}
+
+/* ── Sidebar: logo más carácter ── */
+.sidebar .logo,
+.logo {
+    font-family: 'DM Serif Display', serif;
+    letter-spacing: 0.01em;
+}
+
+/* ── Botones: redondeo sutil y peso correcto ── */
+.btn,
+button.btn,
+.btn-primary,
+.btn-secondary {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: 6px;
+    transition: all 0.18s ease;
+}
+
+/* ── Botones pequeños de tabla ── */
+.btn-sm {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    border-radius: 5px;
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+}
+
+/* ── Cards del dashboard: sombra sutil ── */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(26, 86, 219, 0.10);
+}
+
+/* ── Card values: Inter numérico ── */
+.card-value {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+/* ── Tablas: encabezados más limpios ── */
+th {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+td {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+}
+
+/* ── Labels de formulario ── */
+label,
+.form-group label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+}
+
+/* ── Inputs y selects ── */
+input,
+select,
+textarea {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.92rem;
+    border-radius: 6px;
+}
+
+/* ── Badges de estado ── */
+.estado-badge {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    border-radius: 20px;
+}
+
+/* ── Navegación sidebar ── */
+.nav-list a,
+.nav-item a,
+.sidebar a {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.88rem;
+    letter-spacing: 0.01em;
+}
+
+/* ── Textos vacíos / placeholder ── */
+.msg-empty,
+.empty-state {
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    opacity: 0.6;
+}
+
+/* ── Admin name en header ── */
+.admin-name,
+.waiter-name {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 0.85rem;
+}

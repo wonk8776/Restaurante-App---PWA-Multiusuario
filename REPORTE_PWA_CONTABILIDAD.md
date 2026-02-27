@@ -1,6 +1,6 @@
-# Reporte: PWA de Contabilidad — Restaurante Pro (LuxeDining)
+# Reporte: PWA de Contabilidad — Restaurante Pro (Familia González)
 
-Este documento describe **qué se construyó**, **para qué sirve** y **cómo funciona** el sistema, desde dos perspectivas: **técnica** (para desarrolladores) y **orientada al cliente** (beneficios y funciones para el negocio).
+Este documento describe **qué se construyó**, **para qué sirve** y **cómo funciona** el sistema, desde dos perspectivas: **técnica** (para desarrolladores) y **orientada al cliente** (beneficios y funciones para el negocio). La aplicación está personalizada con la marca **Familia González** en todas las pantallas (admin, mesero, login), tickets e impresiones.
 
 ---
 
@@ -18,7 +18,7 @@ Una **Progressive Web App (PWA)** de gestión y contabilidad para restaurante, c
 | **Backend / BBDD** | Firebase: **Authentication** (email/contraseña), **Firestore** (NoSQL, tiempo real) |
 | **PWA** | `manifest.json` (standalone, theme, icons), **Service Worker** (caché Network First, exclusión de APIs Firebase) |
 | **Gráficos** | Chart.js (gráfica de ingresos/gastos últimos 7 días en el dashboard) |
-| **Hosting** | Configuración Vercel (`vercel.json`) para SPA y rutas |
+| **Hosting** | Vercel: `vercel.json` con headers para `service-worker.js` (no-cache, Service-Worker-Allowed) y `manifest.json` (Content-Type correcto) |
 
 ### Arquitectura y ciclo de datos
 
@@ -51,8 +51,8 @@ Una **Progressive Web App (PWA)** de gestión y contabilidad para restaurante, c
 
 - **Estrategia:** Network First: petición a red primero; si falla, se sirve desde caché.
 - **Exclusiones:** Las peticiones a dominios de Firebase (Firestore, Auth, etc.) no se cachean; siempre se pasan a la red.
-- **Assets estáticos:** HTML (index, mesero, login), JS (app, auth, firebase-config, ticket), manifest, iconos; se precachean en `install` y se usa `skipWaiting`/`clients.claim` en `activate`.
-- **Manifest:** Nombre "Luxe Dining Management", `short_name` "LuxeDining", `display: standalone`, `theme_color`, `background_color`, iconos 192 y 512.
+- **Assets estáticos:** HTML (index, mesero, login), JS (app, auth, firebase-config, ticket), manifest, iconos PWA (192/512); favicons (Favicon.png, Favicon.jpg) disponibles para la pestaña del navegador. Se precachean en `install` y se usa `skipWaiting`/`clients.claim` en `activate`.
+- **Manifest:** Nombre "Familia González", `short_name` "Fam. González", descripción "Sistema de gestión · Familia González", `display: standalone`, `theme_color: #D4AF37`, `background_color: #121212`, iconos 192 y 512.
 
 ### Seguridad y consideraciones
 
@@ -61,7 +61,7 @@ Una **Progressive Web App (PWA)** de gestión y contabilidad para restaurante, c
 
 ### Resumen técnico en una frase
 
-*Se construyó una PWA con HTML/CSS/JS vanilla que usa Firebase Auth para roles (admin/mesero) y Firestore en tiempo real para menú, órdenes, ventas, gastos y cotizaciones, con Service Worker Network First, reportes por fechas, exportación a HTML imprimible y tickets de impresión.*
+*Se construyó una PWA con HTML/CSS/JS vanilla que usa Firebase Auth para roles (admin/mesero) y Firestore en tiempo real para menú, órdenes, ventas, gastos y cotizaciones, con Service Worker Network First, reportes por fechas, exportación a HTML imprimible y tickets de impresión, personalizada con la marca Familia González.*
 
 ---
 
@@ -120,10 +120,10 @@ Sirve para **llevar el control de ventas, gastos y operación del restaurante** 
 
 | Pregunta | Respuesta técnica | Respuesta cliente |
 |----------|-------------------|-------------------|
-| **¿Qué construí?** | PWA con Firebase (Auth + Firestore), dos frontends (admin + mesero), Service Worker, reportes por fechas y tickets de impresión. | Sistema para manejar ventas, gastos y pedidos del restaurante desde el celular o la computadora. |
+| **¿Qué construí?** | PWA con Firebase (Auth + Firestore), dos frontends (admin + mesero), Service Worker, reportes por fechas y tickets de impresión; marca Familia González en toda la app. | Sistema para manejar ventas, gastos y pedidos del restaurante (Familia González) desde el celular o la computadora. |
 | **¿Para qué sirve?** | Centralizar operación y contabilidad en Firestore en tiempo real, con roles y sin backend propio. | Llevar control de caja, ver ganancia en vivo, que meseros tomen pedidos y sacar reportes para contabilidad. |
 | **¿Cómo funciona?** | Login → rol en Firestore → redirección; lecturas/escrituras en tiempo real; reportes con consultas por rango de fechas; PWA con caché Network First. | Entra con usuario/contraseña; admin ve dashboard y reportes; mesero toma pedidos por mesa; al cobrar se registra la venta y puede imprimir ticket y reportes. |
 
 ---
 
-*Documento generado a partir del proyecto Restaurante Pro (LuxeDining) — PWA de contabilidad.*
+*Documento generado a partir del proyecto Restaurante Pro — Familia González — PWA de contabilidad. Última actualización: febrero 2025.*
