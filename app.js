@@ -158,14 +158,27 @@
         var lunesTs = firebase.firestore.Timestamp.fromDate(monday);
         var domingoTs = firebase.firestore.Timestamp.fromDate(sunday);
 
+        var inicioSemanaAnterior = new Date(monday);
+        inicioSemanaAnterior.setDate(monday.getDate() - 7);
+        inicioSemanaAnterior.setHours(0, 0, 0, 0);
+        var lunesAnteriorTs = firebase.firestore.Timestamp.fromDate(inicioSemanaAnterior);
+
         var pVentas = db.collection('ventas').where('timestamp', '>=', lunesTs).where('timestamp', '<=', domingoTs).get();
         var pGastos = db.collection('gastos').where('fecha', '>=', lunesTs).where('fecha', '<=', domingoTs).get();
         var pOrdenes = db.collection('ordenes').where('timestamp', '>=', lunesTs).where('timestamp', '<=', domingoTs).get();
+        var pVentasAnterior = db.collection('ventas').where('timestamp', '>=', lunesAnteriorTs).where('timestamp', '<', lunesTs).get();
 
-        Promise.all([pVentas, pGastos, pOrdenes]).then(function (results) {
+        Promise.all([pVentas, pGastos, pOrdenes, pVentasAnterior]).then(function (results) {
             var ventasSnap = results[0];
             var gastosSnap = results[1];
             var ordenesSnap = results[2];
+            var ventasAnteriorSnap = results[3];
+
+            function normalizarMetodo(str) {
+                var s = (str && String(str).toLowerCase()) || 'efectivo';
+                if (s === 'tarjeta' || s === 'transferencia') return s;
+                return 'efectivo';
+            }
 
             var totalIngresos = 0;
             var ventasList = [];
@@ -173,7 +186,19 @@
                 var data = d.data();
                 var tot = data.total != null ? Number(data.total) : 0;
                 totalIngresos += tot;
-                ventasList.push({ total: tot, platillos: data.platillos || [], meseroNombre: data.meseroNombre || '', timestamp: data.timestamp });
+                ventasList.push({
+                    total: tot,
+                    platillos: data.platillos || [],
+                    meseroNombre: data.meseroNombre || '',
+                    timestamp: data.timestamp,
+                    metodoPago: normalizarMetodo(data.metodoPago)
+                });
+            });
+
+            var totalSemanaAnterior = 0;
+            ventasAnteriorSnap.forEach(function (d) {
+                var tot = d.data().total != null ? Number(d.data().total) : 0;
+                totalSemanaAnterior += tot;
             });
 
             var totalGastos = 0;
@@ -217,6 +242,57 @@
                 }
             }
             if (!horaPico) horaPico = '—';
+
+            var ventasPorHoraDolares = {};
+            ventasList.forEach(function (v) {
+                if (v.timestamp && v.timestamp.toDate) {
+                    var h = v.timestamp.toDate().getHours();
+                    ventasPorHoraDolares[h] = (ventasPorHoraDolares[h] || 0) + v.total;
+                }
+            });
+            var horaMenor = '—';
+            var minSum = Infinity;
+            for (var kh in ventasPorHoraDolares) {
+                var s = ventasPorHoraDolares[kh];
+                if (s > 0 && s < minSum) {
+                    minSum = s;
+                    horaMenor = (kh.length === 1 ? '0' + kh : kh) + ':00';
+                }
+            }
+            if (minSum === Infinity) horaMenor = '—';
+
+            var rangoActivo = '—';
+            var maxRangoSum = 0;
+            var rangoStart = -1;
+            for (var r = 0; r <= 22; r++) {
+                var sum2 = (ventasPorHoraDolares[r] || 0) + (ventasPorHoraDolares[r + 1] || 0);
+                if (sum2 > maxRangoSum) {
+                    maxRangoSum = sum2;
+                    rangoStart = r;
+                }
+            }
+            if (rangoStart >= 0) {
+                var h1 = (rangoStart < 10 ? '0' + rangoStart : '' + rangoStart) + ':00';
+                var h2 = (rangoStart + 2 < 10 ? '0' + (rangoStart + 2) : '' + (rangoStart + 2)) + ':00';
+                rangoActivo = h1 + ' — ' + h2;
+            }
+
+            var metodoCount = { efectivo: 0, tarjeta: 0, transferencia: 0 };
+            ventasList.forEach(function (v) {
+                var m = v.metodoPago || 'efectivo';
+                if (metodoCount[m] !== undefined) metodoCount[m]++;
+                else metodoCount.efectivo++;
+            });
+            var totalVentasCount = ventasList.length;
+            var metodoPrincipal = '—';
+            var metodoMax = 0;
+            for (var mk in metodoCount) {
+                if (metodoCount[mk] > metodoMax) {
+                    metodoMax = metodoCount[mk];
+                    metodoPrincipal = mk.charAt(0).toUpperCase() + mk.slice(1);
+                }
+            }
+            if (totalVentasCount === 0) metodoPrincipal = '—';
 
             var platillosCount = {};
             ventasList.forEach(function (v) {
@@ -273,51 +349,93 @@
                     mesaMasActiva = mesa;
                 }
             }
+            var numMesas = Object.keys(mesaCount).length;
+            var promMesa = numMesas > 0 ? (totalOrdenes / numMesas).toFixed(1) : '—';
 
             function set(id, text) {
                 var el = document.getElementById(id);
                 if (el) el.textContent = text;
             }
+            function setClass(id, className) {
+                var el = document.getElementById(id);
+                if (el) el.className = className;
+            }
+
             set('rsTotalIngresos', '$' + totalIngresos.toFixed(2));
             set('rsTotalGastos', '$' + totalGastos.toFixed(2));
             set('rsGananciaNeta', '$' + gananciaNeta.toFixed(2));
             set('rsPromedioDia', '$' + promedioDia.toFixed(2));
-            set('rsDiaPico', diaPico);
-            set('rsHoraPico', horaPico || '—');
-            set('rsPlatilloEstrella', platilloEstrella);
-            set('rsPlatilloVeces', String(platilloVeces));
-            set('rsMeseroTop', meseroTop);
-            set('rsMeseroTotal', '$' + meseroTopTotal.toFixed(2));
-            set('rsTotalOrdenes', String(totalOrdenes));
             set('rsTicketPromedio', '$' + ticketPromedio.toFixed(2));
-            set('rsMesaMasActiva', mesaMasActiva);
+            set('rsHoraPico', horaPico || '—');
+            set('rsHoraMenor', horaMenor);
+            set('rsRangoActivo', rangoActivo);
+            set('rsPlatilloNombre', platilloEstrella);
+            set('rsPlatilloCantidad', String(platilloVeces));
+            set('rsMeseroTop', meseroTop);
+            set('rsTotalOrdenes', String(totalOrdenes));
+            set('rsMesaActiva', mesaMasActiva);
+            set('rsPromMesa', String(promMesa));
 
-            var rsTop5 = document.getElementById('rsTop5Platillos');
-            if (rsTop5) {
-                rsTop5.innerHTML = '';
-                top5.forEach(function (p) {
-                    var li = document.createElement('li');
-                    li.textContent = p.nombre + ': ' + p.cant + ' vendidos';
-                    rsTop5.appendChild(li);
+            set('rsComparativaActual', '$' + totalIngresos.toFixed(2));
+            set('rsComparativaAnterior', '$' + totalSemanaAnterior.toFixed(2));
+            var diff = totalIngresos - totalSemanaAnterior;
+            var diffStr = (diff >= 0 ? '+' : '') + ' $' + Math.abs(diff).toFixed(2);
+            set('rsComparativaDif', diffStr);
+            setClass('rsComparativaDif', 'reporte-metrica-principal ' + (diff >= 0 ? 'reporte-positivo' : 'reporte-negativo'));
+            var pctVal = totalSemanaAnterior !== 0 ? ((totalIngresos - totalSemanaAnterior) / totalSemanaAnterior * 100) : null;
+            var pctStr = pctVal != null ? (pctVal >= 0 ? '▲ ' : '▼ ') + Math.abs(pctVal).toFixed(1) + '%' : 'N/A';
+            set('rsComparativaPct', pctStr);
+            var pctClass = 'reporte-fila-valor';
+            if (pctVal != null) pctClass += pctVal >= 0 ? ' reporte-positivo' : ' reporte-negativo';
+            setClass('rsComparativaPct', pctClass);
+
+            set('rsMetodoPrincipal', metodoPrincipal);
+            var pctE = totalVentasCount > 0 ? (metodoCount.efectivo / totalVentasCount * 100).toFixed(1) : '0';
+            var pctT = totalVentasCount > 0 ? (metodoCount.tarjeta / totalVentasCount * 100).toFixed(1) : '0';
+            var pctTr = totalVentasCount > 0 ? (metodoCount.transferencia / totalVentasCount * 100).toFixed(1) : '0';
+            set('rsMetodoEfectivo', metodoCount.efectivo + ' órdenes (' + pctE + '%)');
+            set('rsMetodoTarjeta', metodoCount.tarjeta + ' órdenes (' + pctT + '%)');
+            set('rsMetodoTransferencia', metodoCount.transferencia + ' órdenes (' + pctTr + '%)');
+
+            set('kpiIngresosSemana', '$' + totalIngresos.toFixed(2));
+            set('kpiGananciaSemana', '$' + gananciaNeta.toFixed(2));
+            set('kpiOrdenesSemana', String(totalOrdenes));
+
+            var rsTop3 = document.getElementById('rsTop3Platillos');
+            if (rsTop3) {
+                rsTop3.innerHTML = '';
+                var top3 = arr.slice(0, 3);
+                top3.forEach(function (p) {
+                    var row = document.createElement('div');
+                    row.className = 'reporte-fila';
+                    row.innerHTML = '<span class="reporte-fila-label">' + escapeHtml(p.nombre || '—') + '</span><span class="reporte-fila-valor">' + p.cant + ' vendidos</span>';
+                    rsTop3.appendChild(row);
                 });
             }
-            var rsListaMeseros = document.getElementById('rsListaMeseros');
-            if (rsListaMeseros) {
-                rsListaMeseros.innerHTML = '';
+
+            var rsRanking = document.getElementById('rsRankingMeseros');
+            if (rsRanking) {
+                rsRanking.innerHTML = '';
                 listaMeseros.forEach(function (m) {
-                    var li = document.createElement('li');
-                    li.textContent = m.nombre + ': $' + m.total.toFixed(2);
-                    rsListaMeseros.appendChild(li);
+                    var row = document.createElement('div');
+                    row.className = 'reporte-fila';
+                    row.innerHTML = '<span class="reporte-fila-label">' + escapeHtml(m.nombre || '—') + '</span><span class="reporte-fila-valor">$' + m.total.toFixed(2) + '</span>';
+                    rsRanking.appendChild(row);
                 });
             }
+
             var rsVentasPorDia = document.getElementById('rsVentasPorDia');
             if (rsVentasPorDia) {
                 rsVentasPorDia.innerHTML = '';
                 var ordenDias = [1, 2, 3, 4, 5, 6, 0];
                 ordenDias.forEach(function (idx) {
-                    var li = document.createElement('li');
-                    li.textContent = nombresDia[idx] + ': $' + (ventasPorDiaSemana[idx] || 0).toFixed(2);
-                    rsVentasPorDia.appendChild(li);
+                    var row = document.createElement('div');
+                    row.className = 'reporte-fila';
+                    var val = (ventasPorDiaSemana[idx] || 0).toFixed(2);
+                    var esPico = idx === diaPicoIdx;
+                    var valorHtml = '$' + val + (esPico ? ' ★' : '');
+                    row.innerHTML = '<span class="reporte-fila-label">' + nombresDia[idx] + '</span><span class="reporte-fila-valor"' + (esPico ? ' style="color:var(--color-primary);font-weight:700;"' : '') + '>' + valorHtml + '</span>';
+                    rsVentasPorDia.appendChild(row);
                 });
             }
 
@@ -646,18 +764,24 @@
                         {
                             label: 'Ingresos',
                             data: ingresosPorDia,
-                            borderColor: '#D4AF37',
-                            backgroundColor: 'transparent',
-                            fill: false,
-                            tension: 0.2
+                            borderColor: '#1565C0',
+                            backgroundColor: 'rgba(21,101,192,0.08)',
+                            fill: true,
+                            tension: 0.2,
+                            pointBackgroundColor: '#1565C0',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2
                         },
                         {
                             label: 'Gastos',
                             data: gastosPorDia,
-                            borderColor: '#CF6679',
-                            backgroundColor: 'transparent',
-                            fill: false,
-                            tension: 0.2
+                            borderColor: '#C62828',
+                            backgroundColor: 'rgba(198,40,40,0.06)',
+                            fill: true,
+                            tension: 0.2,
+                            pointBackgroundColor: '#C62828',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2
                         }
                     ]
                 },
@@ -668,17 +792,19 @@
                         legend: {
                             display: true,
                             position: 'top',
-                            labels: { color: '#A0A0A0' }
+                            labels: { color: '#1A2744' }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { color: '#333' },
-                            ticks: { color: '#A0A0A0' }
+                            grid: { color: 'rgba(0,0,0,0.06)' },
+                            ticks: { color: '#546E7A' },
+                            border: { color: '#D6E0F0' }
                         },
                         y: {
-                            grid: { color: '#333' },
-                            ticks: { color: '#A0A0A0' }
+                            grid: { color: 'rgba(0,0,0,0.06)' },
+                            ticks: { color: '#546E7A' },
+                            border: { color: '#D6E0F0' }
                         }
                     }
                 }
@@ -823,6 +949,8 @@
             btn.addEventListener('click', function () {
                 if (typeof window.prepararTicket === 'function') {
                     window.prepararTicket(btn.getAttribute('data-id'));
+                } else {
+                    alert('El módulo de impresión no está disponible.\nRecarga la página e intenta de nuevo.');
                 }
             });
         });
@@ -976,23 +1104,43 @@
         db.collection('menu').doc(id).delete();
     }
 
+    var CATEGORIAS_ORDEN = ['Entradas', 'Platos fuertes', 'Bebidas', 'Postres', 'Otros'];
+    function slugCategoria(cat) {
+        var s = (cat || 'Otros').toLowerCase().replace(/\s+/g, '-');
+        return (s === 'platos-fuertes' || s === 'entradas' || s === 'bebidas' || s === 'postres' || s === 'otros') ? s : 'otros';
+    }
+
     function renderMenu(snap) {
         if (!menuBody) return;
         var rows = [];
         if (snap.empty) {
             rows.push('<tr><td colspan="4" class="msg-empty">No hay platillos. Agregue uno.</td></tr>');
         } else {
+            var porCategoria = {};
             snap.forEach(function (d) {
                 var data = d.data();
-                var id = d.id;
-                var nombre = data.nombre || '';
-                var precio = (data.precio != null) ? '$' + Number(data.precio).toFixed(2) : '';
-                var categoria = data.categoria || 'Otros';
-                rows.push(
-                    '<tr><td data-label="Nombre">' + escapeHtml(nombre) + '</td><td data-label="Precio">' + precio + '</td><td data-label="Categoría">' + escapeHtml(categoria) + '</td><td data-label="Acciones">' +
-                    '<button type="button" class="btn-sm btn-secondary editar-platillo" data-id="' + id + '" data-nombre="' + escapeHtml(nombre) + '" data-precio="' + (data.precio != null ? data.precio : '') + '" data-categoria="' + escapeHtml(categoria) + '">Editar</button> ' +
-                    '<button type="button" class="btn-sm btn-danger eliminar-platillo" data-id="' + id + '">Eliminar</button></td></tr>'
-                );
+                var cat = data.categoria || 'Otros';
+                if (!porCategoria[cat]) porCategoria[cat] = [];
+                porCategoria[cat].push({ id: d.id, data: data });
+            });
+            CATEGORIAS_ORDEN.forEach(function (categoria) {
+                var items = porCategoria[categoria];
+                if (!items || items.length === 0) return;
+                var slug = slugCategoria(categoria);
+                rows.push('<tr class="menu-cat-header menu-cat-' + slug + '"><td colspan="4">' + escapeHtml(categoria.toUpperCase()) + '</td></tr>');
+                items.forEach(function (item) {
+                    var data = item.data;
+                    var id = item.id;
+                    var nombre = data.nombre || '';
+                    var precio = (data.precio != null) ? '$' + Number(data.precio).toFixed(2) : '';
+                    var cat = data.categoria || 'Otros';
+                    var rowSlug = slugCategoria(cat);
+                    rows.push(
+                        '<tr class="menu-row menu-row-cat-' + rowSlug + '"><td data-label="Nombre">' + escapeHtml(nombre) + '</td><td data-label="Precio">' + precio + '</td><td data-label="Categoría">' + escapeHtml(cat) + '</td><td data-label="Acciones">' +
+                        '<button type="button" class="btn-sm btn-secondary editar-platillo" data-id="' + id + '" data-nombre="' + escapeHtml(nombre) + '" data-precio="' + (data.precio != null ? data.precio : '') + '" data-categoria="' + escapeHtml(cat) + '">Editar</button> ' +
+                        '<button type="button" class="btn-sm btn-danger eliminar-platillo" data-id="' + id + '">Eliminar</button></td></tr>'
+                    );
+                });
             });
         }
         menuBody.innerHTML = rows.join('');
@@ -1023,7 +1171,8 @@
             menuItemsAdmin.push({
                 id: d.id,
                 nombre: data.nombre != null ? String(data.nombre) : '',
-                precio: data.precio != null ? Number(data.precio) : 0
+                precio: data.precio != null ? Number(data.precio) : 0,
+                categoria: data.categoria || 'Otros'
             });
         });
         renderMenu(snap);
@@ -1732,12 +1881,25 @@
         optVacía.value = '';
         optVacía.textContent = 'Seleccione platillo';
         selectPlatillo.appendChild(optVacía);
+        var porCat = {};
         menuItemsAdmin.forEach(function (item) {
-            var opt = document.createElement('option');
-            opt.value = item.id;
-            opt.setAttribute('data-precio', String(item.precio));
-            opt.textContent = item.nombre;
-            selectPlatillo.appendChild(opt);
+            var cat = item.categoria || 'Otros';
+            if (!porCat[cat]) porCat[cat] = [];
+            porCat[cat].push(item);
+        });
+        CATEGORIAS_ORDEN.forEach(function (categoria) {
+            var items = porCat[categoria];
+            if (!items || items.length === 0) return;
+            var optgroup = document.createElement('optgroup');
+            optgroup.label = categoria;
+            items.forEach(function (item) {
+                var opt = document.createElement('option');
+                opt.value = item.id;
+                opt.setAttribute('data-precio', String(item.precio));
+                opt.textContent = item.nombre + ' — $' + (item.precio != null ? Number(item.precio).toFixed(2) : '0.00');
+                optgroup.appendChild(opt);
+            });
+            selectPlatillo.appendChild(optgroup);
         });
         var inpPrecio = document.createElement('input');
         inpPrecio.type = 'number';
@@ -2132,49 +2294,12 @@
     }
 
     function imprimirCotizacion(id) {
-        if (!id || typeof db === 'undefined') return;
-        var container = document.getElementById('ticket-container');
-        if (!container) return;
-        db.collection('cotizaciones').doc(id).get().then(function (doc) {
-            if (!doc.exists) {
-                alert('No se encontró la cotización.');
-                return;
-            }
-            var data = doc.data();
-            var titulo = (data.titulo || 'Cotización').toString();
-            var detalles = data.detalles != null ? String(data.detalles) : '—';
-            var total = data.total != null ? Number(data.total) : 0;
-            var platillos = Array.isArray(data.platillos) ? data.platillos : [];
-            var filas = '';
-            platillos.forEach(function (p) {
-                var nombre = (p && p.nombre) ? p.nombre : '—';
-                var cant = (p && p.cantidad) ? parseInt(p.cantidad, 10) : 1;
-                var precio = (p && p.precio != null) ? Number(p.precio) : 0;
-                var importe = (cant * precio).toFixed(2);
-                filas += '<tr><td>' + cant + '</td><td>' + escapeHtml(nombre) + '</td><td>$' + importe + '</td></tr>';
-            });
-            var html = '<div class="ticket-paper">' +
-                '<h1 class="ticket-logo">COTIZACIÓN</h1>' +
-                '<p class="ticket-detalles">' + escapeHtml(titulo) + '</p>' +
-                '<p class="ticket-fecha">Detalles: ' + escapeHtml(detalles) + '</p>' +
-                '<table class="ticket-tabla"><thead><tr><th>Cant.</th><th>Descripción</th><th>Importe</th></tr></thead><tbody>' + filas + '</tbody></table>' +
-                '<p class="ticket-total">Total: $' + total.toFixed(2) + '</p>' +
-                '<p class="ticket-gracias">Gracias por su preferencia</p></div>';
-            container.innerHTML = html;
-            container.style.display = 'block';
-            container.style.visibility = 'visible';
-
-            function limpiarTicket() {
-                container.style.display = 'none';
-                container.innerHTML = '';
-                window.removeEventListener('afterprint', limpiarTicket);
-            }
-            window.addEventListener('afterprint', limpiarTicket);
-            setTimeout(function () { window.print(); }, 150);
-        }).catch(function (err) {
-            console.error('Error al obtener cotización:', err);
-            alert('No se pudo cargar la cotización.');
-        });
+        if (!id) return;
+        if (typeof window.prepararCotizacion === 'function') {
+            window.prepararCotizacion(id);
+        } else {
+            alert('El módulo de impresión no está disponible. Recarga la página.');
+        }
     }
 
     var btnNuevaCotizacion = document.getElementById('btnNuevaCotizacion');

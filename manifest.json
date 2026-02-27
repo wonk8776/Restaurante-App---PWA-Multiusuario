@@ -1,7 +1,7 @@
 {
-  "name": "Luxe Dining Management",
-  "short_name": "LuxeDining",
-  "description": "Sistema Administrativo de Restaurante",
+  "name": "Familia González",
+  "short_name": "Fam. González",
+  "description": "Sistema de gestión · Familia González",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",

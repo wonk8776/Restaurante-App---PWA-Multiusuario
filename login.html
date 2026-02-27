@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurante Pro - Acceso</title>
+    <title>Familia González — Acceso</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#D4AF37">
+    <meta name="theme-color" content="#1A3A6B">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="LuxeDining">
+    <meta name="apple-mobile-web-app-title" content="Familia González">
 
     <!-- Google Fonts for Premium Look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,15 +20,41 @@
 
     <style>
         :root {
-            --color-bg: #121212;
-            --color-card: #1E1E1E;
-            --color-primary: #D4AF37;
-            /* Gold */
-            --color-text: #E0E0E0;
-            --color-text-muted: #A0A0A0;
-            --color-error: #CF6679;
+            --color-bg: #F4F6FB;
+            --color-card: #FFFFFF;
+            --color-card-alt: #F0F4FF;
+            --color-sidebar: #1A3A6B;
+            --color-sidebar-active: #1565C0;
+            --color-sidebar-text: #FFFFFF;
+            --color-sidebar-text-muted: rgba(255,255,255,0.65);
+            --color-primary: #1565C0;
+            --color-primary-light: #E3EEFF;
+            --color-primary-hover: #0D47A1;
+            --color-accent: #1976D2;
+            --color-green: #2E7D32;
+            --color-green-light: #E8F5E9;
+            --color-green-action: #388E3C;
+            --color-green-action-hover: #2E7D32;
+            --color-red: #C62828;
+            --color-red-light: #FFEBEE;
+            --color-warning: #F57F17;
+            --color-warning-light: #FFF8E1;
+            --color-text: #1A2744;
+            --color-text-muted: #546E7A;
+            --color-text-dim: #90A4AE;
+            --color-border: #D6E0F0;
+            --color-border-focus: #1565C0;
+            --shadow-xs: 0 1px 3px rgba(26,58,107,0.08);
+            --shadow-sm: 0 2px 8px rgba(26,58,107,0.10);
+            --shadow-md: 0 4px 16px rgba(26,58,107,0.12);
+            --shadow-lg: 0 8px 32px rgba(26,58,107,0.16);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-pill: 999px;
             --font-heading: 'Playfair Display', serif;
             --font-body: 'Lato', sans-serif;
+            --color-error: var(--color-red);
         }
 
         * {
@@ -37,34 +63,69 @@
             box-sizing: border-box;
         }
 
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: var(--radius-pill);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-primary);
+        }
+
         body {
             font-family: var(--font-body);
-            background-color: var(--color-bg);
+            background: linear-gradient(135deg, #1A3A6B 0%, #1565C0 40%, #2E7D32 100%);
             color: var(--color-text);
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
         }
 
         .login-container {
-            background-color: var(--color-card);
+            background: #FFFFFF;
             padding: 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
             width: 100%;
             max-width: 400px;
             text-align: center;
-            border: 1px solid #333;
+            border: none;
+            position: relative;
+            z-index: 1;
+        }
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            background: linear-gradient(90deg, var(--color-sidebar) 0%, var(--color-primary) 50%, var(--color-green-action) 100%);
         }
 
         .logo {
             font-family: var(--font-heading);
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: var(--color-primary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0;
             letter-spacing: 1px;
+        }
+
+        .login-container .logo::after {
+            content: '';
+            display: block;
+            width: 60px;
+            margin: 0.75rem auto 1.5rem;
+            border-bottom: 2px solid var(--color-border);
         }
 
         .subtitle {
@@ -72,6 +133,13 @@
             font-size: 0.9rem;
             margin-bottom: 2rem;
             font-weight: 300;
+        }
+
+        .login-container .form-group label {
+            color: var(--color-text);
+            font-weight: 600;
+            font-size: 0.82rem;
+            letter-spacing: 0.3px;
         }
 
         .form-group {
@@ -82,18 +150,18 @@
         label {
             display: block;
             margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--color-primary);
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            font-size: 0.82rem;
+            color: var(--color-text);
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
 
         input {
             width: 100%;
             padding: 12px;
-            background-color: #2C2C2C;
-            border: 1px solid #444;
-            border-radius: 4px;
+            background: #F4F6FB;
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-sm);
             color: var(--color-text);
             font-size: 1rem;
             transition: border-color 0.3s, box-shadow 0.3s;
@@ -101,29 +169,36 @@
 
         input:focus {
             outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+            border-color: var(--color-border-focus);
+            box-shadow: 0 0 0 3px rgba(21,101,192,0.12);
+        }
+
+        input::placeholder {
+            color: var(--color-text-dim);
         }
 
         button {
             width: 100%;
             padding: 14px;
-            background-color: var(--color-primary);
-            color: #121212;
+            background: var(--color-primary);
+            color: #FFFFFF;
             border: none;
-            border-radius: 4px;
-            font-size: 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.2s;
             font-family: var(--font-body);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 1rem;
+            box-shadow: var(--shadow-md);
         }
 
         button:hover {
-            background-color: #C5A028;
+            background: var(--color-primary-hover);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
         }
 
         button:active {
@@ -132,7 +207,7 @@
         }
 
         .error-message {
-            color: var(--color-error);
+            color: var(--color-red);
             font-size: 0.9rem;
             margin-top: 1rem;
             min-height: 1.25rem;
@@ -149,9 +224,9 @@
             display: none;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            border-top-color: #000;
+            border-top-color: #FFFFFF;
             animation: spin 1s ease-in-out infinite;
             margin: 0 auto;
         }
@@ -175,8 +250,21 @@
 <body>
 
     <div class="login-container">
-        <h1 class="logo">LUXE DINING</h1>
-        <p class="subtitle">Acceso exclusivo para personal</p>
+        <h1 class="logo">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" width="48" height="48" style="display:block;margin:0 auto 0.5rem;">
+                <ellipse cx="20" cy="26" rx="14" ry="10" fill="#8B0000"/>
+                <rect x="5" y="17" width="30" height="5" rx="2.5" fill="#6B0000"/>
+                <ellipse cx="20" cy="18" rx="14" ry="5" fill="#A00000"/>
+                <rect x="17" y="12" width="6" height="6" rx="3" fill="#5D4037"/>
+                <path d="M13,11 C12,9 14,7 13,4" fill="none" stroke="#E0E0E0" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M20,11 C19,9 21,7 20,4" fill="none" stroke="#E0E0E0" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M27,11 C26,9 28,7 27,4" fill="none" stroke="#E0E0E0" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M6,22 C3,22 3,28 6,28" fill="none" stroke="#6B0000" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M34,22 C37,22 37,28 34,28" fill="none" stroke="#6B0000" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            Familia González
+        </h1>
+        <p class="subtitle">Sistema de gestión · Barbacoa y más</p>
 
         <form id="loginForm">
             <div class="form-group">
