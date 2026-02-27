@@ -2082,6 +2082,7 @@
                     '<tr><td data-label="Título">' + titulo + '</td><td data-label="Detalles">' + detallesStr + '</td><td data-label="Total">' + total + '</td><td data-label="Fecha">' + fecha + '</td><td data-label="Acciones">' +
                     '<button type="button" class="btn-sm btn-editar-cotizacion" data-id="' + escapeHtml(id) + '">Editar</button> ' +
                     '<button type="button" class="btn-sm btn-imprimir-cotizacion" data-id="' + escapeHtml(id) + '">Imprimir</button> ' +
+                    '<button type="button" class="btn-sm btn-whatsapp btn-whatsapp-cotizacion" data-id="' + escapeHtml(id) + '">WhatsApp</button> ' +
                     '<button type="button" class="btn-sm btn-danger btn-eliminar-cotizacion" data-id="' + escapeHtml(id) + '">Eliminar</button></td></tr>'
                 );
             });
@@ -2110,6 +2111,15 @@
                     imprimirCotizacion(btn.getAttribute('data-id'));
                 });
             });
+
+            cotizacionesBody.querySelectorAll('.btn-whatsapp-cotizacion').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    if (typeof window.enviarWhatsAppCotizacion === 'function') {
+                        window.enviarWhatsAppCotizacion(btn.getAttribute('data-id'));
+                    }
+                });
+            });
+
         });
 
         cotizacionFilas.innerHTML = '';
@@ -2294,13 +2304,13 @@
     }
 
     function imprimirCotizacion(id) {
-        if (!id) return;
-        if (typeof window.prepararCotizacion === 'function') {
-            window.prepararCotizacion(id);
-        } else {
-            alert('El módulo de impresión no está disponible. Recarga la página.');
-        }
+    if (!id) return;
+    if (typeof window.prepararCotizacion === 'function') {
+        window.prepararCotizacion(id);
+    } else {
+        alert('El módulo de impresión no está disponible. Recarga la página.');
     }
+}
 
     var btnNuevaCotizacion = document.getElementById('btnNuevaCotizacion');
     if (btnNuevaCotizacion) {
