@@ -892,18 +892,17 @@
                 var id = d.id;
                 var mesa = data.mesa || '-';
                 var mesero = data.meseroNombre || '-';
-                var sepPlatillos = String.fromCharCode(44) + ' ';
-                var emptyPlatillos = '-';
-                var platillosList = Array.isArray(data.platillos)
-                    ? data.platillos.map(function (p) {
-                        var n = '';
-                        if (p && p.nombre) n = p.nombre;
-                        else if (typeof p === 'string') n = p;
+                var platillosHtml = '';
+                if (Array.isArray(data.platillos) && data.platillos.length > 0) {
+                    var items = data.platillos.map(function (p) {
+                        var n = (p && p.nombre) ? p.nombre : (typeof p === 'string' ? p : '');
                         var q = (p && p.cantidad) ? ' x' + p.cantidad : '';
-                        return n + q;
-                    })
-                    : [];
-                var platillos = platillosList.join(sepPlatillos) || emptyPlatillos;
+                        return '<li>' + escapeHtml(n + q) + '</li>';
+                    });
+                    platillosHtml = '<ul style="margin:0;padding-left:1.1em;list-style:disc;">' + items.join('') + '</ul>';
+                } else {
+                    platillosHtml = '<span>-</span>';
+                }
                 var total;
                 if (data.total != null) {
                     total = '$' + Number(data.total).toFixed(2);
@@ -928,7 +927,7 @@
                 auxHtml += '<button type="button" class="btn-sm btn-danger eliminar-orden" data-id="' + id + '" title="Eliminar orden">Eliminar</button>';
                 var opciones = '<div class="orden-acciones"><div class="orden-acciones-flujo">' + flujoHtml + '</div><div class="orden-acciones-aux">' + auxHtml + '</div></div>';
                 rows.push(
-                    '<tr><td data-label="Mesa">' + escapeHtml(mesa) + '</td><td data-label="Mesero">' + escapeHtml(mesero) + '</td><td data-label="Platillos">' + escapeHtml(platillos) + '</td><td data-label="Total">' + total + '</td><td data-label="Estado"><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td data-label="Acciones">' + opciones + '</td></tr>'
+                    '<tr><td data-label="Mesa">' + escapeHtml(mesa) + '</td><td data-label="Mesero">' + escapeHtml(mesero) + '</td><td data-label="Platillos">' + platillosHtml + '</td><td data-label="Total">' + total + '</td><td data-label="Estado"><span class="estado-badge ' + clase + '">' + escapeHtml(estado) + '</span></td><td data-label="Acciones">' + opciones + '</td></tr>'
                 );
             });
         }
