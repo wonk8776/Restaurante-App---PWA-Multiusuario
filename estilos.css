@@ -882,10 +882,9 @@ td {
     border: 1px solid var(--color-border);
     border-top: 6px solid transparent;
     border-top: none;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
-    max-height: 500px;
     transition: all 0.3s ease;
 }
 
